@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Sylon</string>
     <string name="test_message">Ja Servus. I bims</string>
+    <string name="permissions_denied">Mensch</string>
 </resources>
