@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             File firstExtDir = externalMediaDirs[0];
             if (firstExtDir != null && firstExtDir.exists()) {
                 File subDir = new File(firstExtDir, getString(R.string.app_name));
-                if (subDir.mkdirs()) {
+                if (subDir.mkdirs() || subDir.exists()) {
                     return subDir;
                 }
             }
