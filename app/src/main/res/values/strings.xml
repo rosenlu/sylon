@@ -2,4 +2,11 @@
     <string name="app_name">Sylon</string>
     <string name="test_message">Ja Servus. I bims</string>
     <string name="permissions_denied">Mensch</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="dialog_delete_file_msg">Are you sure you want to delete this file?</string>
+    <string name="enter_file_name">Enter file name</string>
+    <string name="add">Add</string>
+    <string name="enter_new_name">Enter new name</string>
+    <string name="update">Update</string>
 </resources>

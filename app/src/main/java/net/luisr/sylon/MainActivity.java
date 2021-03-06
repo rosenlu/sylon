@@ -1,150 +1,68 @@
 package net.luisr.sylon;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "Sylon";
 
-    private static final int REQUEST_CODE_CAMERA = 10;
-
-    private final String FILENAME_FORMAT = "yyyy-MM-dd_HHmmss-SSS";
-
-    private ImageCapture imageCapture = null;
-
-    private File imgDirectory;
-    private File pdfDirectory;
-    private ExecutorService cameraExecutor;
+    List<SylonFile> fileList = new ArrayList<>();
+    RecyclerView filesRecView;
+    FloatingActionButton btnAdd;
+    LinearLayoutManager linearLayoutManager;
+    FilesRecViewAdapter adapter;
+    AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageCapture = new ImageCapture.Builder()
-                .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
-                .build();
+        filesRecView = findViewById(R.id.filesRecView);
+        btnAdd = findViewById(R.id.btnAdd);
 
-        if (allPermissionsGranted()) {
-            startCamera();
-        } else {
-            requestPermissions(new String[] { Manifest.permission.CAMERA }, REQUEST_CODE_CAMERA);
-        }
+        database = AppDatabase.getInstance(this);
+        fileList = database.fileDao().getAll();
 
-        findViewById(R.id.camera_capture_button).setOnClickListener(v -> takePhoto());
+        linearLayoutManager = new LinearLayoutManager(this);
+        filesRecView.setLayoutManager(linearLayoutManager);
+        adapter = new FilesRecViewAdapter(MainActivity.this, fileList);
+        filesRecView.setAdapter(adapter);
 
-        File outputDirectory = getOutputDirectory();
-        imgDirectory = new File(outputDirectory, "img");
-        pdfDirectory = new File(outputDirectory, "pdf");
-        if (!imgDirectory.exists() || !pdfDirectory.exists()) {
-            if (!imgDirectory.mkdirs() || !pdfDirectory.mkdirs()) {
-                Log.w(TAG, "Could not create subdirs.");
-            }
-        }
+        btnAdd.setOnClickListener(v -> {
+            Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.dialog_add_file);
+            int w = WindowManager.LayoutParams.MATCH_PARENT;
+            int h = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setLayout(w, h);
+            dialog.show();
 
-        cameraExecutor = Executors.newSingleThreadExecutor();
-    }
+            EditText edtText = dialog.findViewById(R.id.edtText);
+            Button btnConfirm = dialog.findViewById(R.id.btnAdd);
 
-    private File getOutputDirectory() {
-        File[] externalMediaDirs = getExternalMediaDirs();
-        File filesDir = getFilesDir();
-        if (externalMediaDirs.length != 0) {
-            File firstExtDir = externalMediaDirs[0];
-            if (firstExtDir != null && firstExtDir.exists()) {
-                File subDir = new File(firstExtDir, getString(R.string.app_name));
-                if (subDir.mkdirs() || subDir.exists()) {
-                    return subDir;
+            btnConfirm.setOnClickListener(dv -> {
+                dialog.dismiss();
+                String sName = edtText.getText().toString().trim();
+                if (!sName.equals("")) {
+                    SylonFile sf = new SylonFile();
+                    sf.setName(sName);
+                    database.fileDao().insert(sf);
+
+                    fileList.add(database.fileDao().getById(sf.getId()));
+                    adapter.notifyDataSetChanged();
                 }
-            }
-        }
-        return filesDir;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CODE_CAMERA) {
-            if (allPermissionsGranted()) {
-                startCamera();
-            } else {
-                Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void takePhoto() {
-        File outputFile = new File(imgDirectory, new SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg");
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(outputFile).build();
-        imageCapture.takePicture(outputFileOptions, cameraExecutor, new ImageCapture.OnImageSavedCallback() {
-            @Override
-            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                String savedUri = Uri.fromFile(outputFile).toString();
-                String msg = "Image " + savedUri + " saved successfully!";
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
-                Log.d(TAG, msg);
-            }
-
-            @Override
-            public void onError(@NonNull ImageCaptureException exception) {
-//                Toast.makeText(MainActivity.this, "Image " + outputFile.toString() + " could not be saved", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "Image could not be saved: " + exception.getMessage());
-            }
+            });
         });
-    }
-
-    private void startCamera() {
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-
-        cameraProviderFuture.addListener(() -> {
-
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                Preview preview = new Preview.Builder().build();
-
-                CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
-
-                PreviewView previewView = findViewById(R.id.viewFinder);
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                //cameraProvider.unbindAll();
-                Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageCapture, preview);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, ContextCompat.getMainExecutor(this));
-    }
-
-    private boolean allPermissionsGranted() {
-        return checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        cameraExecutor.shutdown();
     }
 }
