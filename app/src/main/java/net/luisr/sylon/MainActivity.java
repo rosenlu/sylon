@@ -6,11 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -47,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void btnAddCallback() {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_add_file);
+        dialog.setContentView(R.layout.dialog_add_doc);
         int w = WindowManager.LayoutParams.MATCH_PARENT;
         int h = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setLayout(w, h);

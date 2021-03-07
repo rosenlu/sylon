@@ -27,6 +27,6 @@
         android:text="@string/cancel"
         android:layout_below="@id/txtMessage"
         android:layout_toStartOf="@id/btnDelete"
-        android:layout_marginRight="10dp"/>
+        android:layout_marginEnd="10dp"/>
 
 </RelativeLayout>

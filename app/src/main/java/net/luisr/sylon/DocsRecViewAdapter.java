@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,7 +32,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     @Override
     public DocsRecViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_files, parent, false);
+                .inflate(R.layout.list_item_docs, parent, false);
         return new ViewHolder(view);
     }
 
@@ -43,8 +43,23 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         holder.txtFileName.setText(document.getName());
 
-        holder.btnEdit.setOnClickListener(v -> btnEditCallback(document, position));
-        holder.btnDelete.setOnClickListener(v -> btnDeleteCallback(document, position));
+        holder.txtViewOptions.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(context, holder.txtViewOptions);
+            popup.inflate(R.menu.options_menu_document);
+            popup.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.itemEdit) {
+                    itemEditCallback(document, position);
+                    return true;
+                } else if (itemId == R.id.itemDelete) {
+                    itemDeleteCallback(document, position);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            popup.show();
+        });
     }
 
     @Override
@@ -52,12 +67,12 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         return fileList.size();
     }
 
-    private void btnEditCallback(Document document, int position) {
+    private void itemEditCallback(Document document, int position) {
         int sID = document.getId();
         String sName = document.getName();
 
         Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_edit_file_name);
+        dialog.setContentView(R.layout.dialog_edit_doc_name);
         int w = WindowManager.LayoutParams.MATCH_PARENT;
         int h = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setLayout(w, h);
@@ -85,12 +100,12 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         notifyItemChanged(position);
     }
 
-    private void btnDeleteCallback(Document document, int position) {
+    private void itemDeleteCallback(Document document, int position) {
         int sID = document.getId();
         String sName = document.getName();
 
         Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_delete_file);
+        dialog.setContentView(R.layout.dialog_delete_doc);
         int w = WindowManager.LayoutParams.MATCH_PARENT;
         int h = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setLayout(w, h);
@@ -115,15 +130,13 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView txtFileName;
-        ImageView btnEdit, btnDelete;
+        TextView txtFileName, txtViewOptions;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             txtFileName = itemView.findViewById(R.id.txtFileName);
-            btnEdit = itemView.findViewById(R.id.btnEdit);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            txtViewOptions = itemView.findViewById(R.id.txtViewOptions);
         }
     }
 }

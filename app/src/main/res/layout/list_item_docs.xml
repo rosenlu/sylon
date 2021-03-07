@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="5dp"
+    app:cardElevation="5dp"
+    app:cardCornerRadius="5dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="70dp"
+            android:id="@+id/imgViewFirstPage"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_launcher_background"
+            android:contentDescription="@string/first_page"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/imgViewFirstPage"
+            android:layout_toStartOf="@id/txtViewOptions"
+            android:text="@string/document_name"
+            android:textSize="16sp"
+            android:id="@+id/txtFileName"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtViewOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:text="&#8942;"
+            android:textStyle="bold"
+            android:textAppearance="?android:textAppearanceLarge"/>
+
+
+<!--        <ImageView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/btnDelete"-->
+<!--            android:src="@drawable/ic_delete"-->
+<!--            android:layout_alignParentEnd="true"/>-->
+
+<!--        <ImageView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/btnEdit"-->
+<!--            android:src="@drawable/ic_edit"-->
+<!--            android:layout_toStartOf="@+id/btnDelete"-->
+<!--            android:layout_marginEnd="5dp"/>-->
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>
