@@ -10,24 +10,24 @@ import java.util.List;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
-public interface SylonFileDao {
+public interface DocumentDao {
 
     @Insert(onConflict = REPLACE)
-    void insert(SylonFile sylonFile);
+    void insert(Document document);
 
     @Delete
-    void delete(SylonFile sylonFile);
+    void delete(Document document);
 
     @Delete
-    void reset(List<SylonFile> sylonFileList);
+    void reset(List<Document> documentList);
 
     @Query("UPDATE table_file SET name = :sName WHERE id = :sID")
     void update(int sID, String sName);
 
     @Query("SELECT * FROM table_file")
-    List<SylonFile> getAll();
+    List<Document> getAll();
 
     @Query("SELECT * FROM table_file WHERE id = :sID LIMIT 1")
-    SylonFile getById(int sID);
+    Document getById(int sID);
 
 }

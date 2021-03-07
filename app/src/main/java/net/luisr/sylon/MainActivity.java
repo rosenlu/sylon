@@ -17,11 +17,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<SylonFile> fileList = new ArrayList<>();
+    List<Document> fileList = new ArrayList<>();
     RecyclerView filesRecView;
     FloatingActionButton btnAdd;
     LinearLayoutManager linearLayoutManager;
-    FilesRecViewAdapter adapter;
+    DocsRecViewAdapter adapter;
     AppDatabase database;
 
     @Override
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        filesRecView = findViewById(R.id.filesRecView);
+        filesRecView = findViewById(R.id.docsRecView);
         btnAdd = findViewById(R.id.btnAdd);
 
         database = AppDatabase.getInstance(this);
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         linearLayoutManager = new LinearLayoutManager(this);
         filesRecView.setLayoutManager(linearLayoutManager);
-        adapter = new FilesRecViewAdapter(MainActivity.this, fileList);
+        adapter = new DocsRecViewAdapter(MainActivity.this, fileList);
         filesRecView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> {
@@ -55,11 +55,12 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
                 String sName = edtText.getText().toString().trim();
                 if (!sName.equals("")) {
-                    SylonFile sf = new SylonFile();
+                    Document sf = new Document();
                     sf.setName(sName);
                     database.fileDao().insert(sf);
 
-                    fileList.add(database.fileDao().getById(sf.getId()));
+                    fileList.clear();
+                    fileList.addAll(database.fileDao().getAll());
                     adapter.notifyDataSetChanged();
                 }
             });

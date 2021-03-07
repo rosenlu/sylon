@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
 @Entity(tableName = "table_file")
-public class SylonFile implements Serializable {
+public class Document implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;

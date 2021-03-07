@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {SylonFile.class}, version = 1, exportSchema = false)
+@Database(entities = {Document.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase database;
@@ -22,6 +22,6 @@ public abstract class AppDatabase extends RoomDatabase {
         return database;
     }
 
-    public abstract SylonFileDao fileDao();
+    public abstract DocumentDao fileDao();
 
 }

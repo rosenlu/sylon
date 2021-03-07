@@ -2,6 +2,7 @@ package net.luisr.sylon;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +15,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 
-public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapter.ViewHolder> {
+public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.ViewHolder> {
 
-    private List<SylonFile> fileList;
+    private List<Document> fileList;
     private Activity context;
     private AppDatabase database;
 
-    public FilesRecViewAdapter(Activity context, List<SylonFile> fileList) {
+    public DocsRecViewAdapter(Activity context, List<Document> fileList) {
         this.fileList = fileList;
         this.context = context;
         notifyDataSetChanged();
@@ -30,21 +33,21 @@ public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapte
 
     @NonNull
     @Override
-    public FilesRecViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DocsRecViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_files, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FilesRecViewAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull DocsRecViewAdapter.ViewHolder holder, int position) {
         database = AppDatabase.getInstance(context);
-        SylonFile sylonFile = fileList.get(position);
+        Document document = fileList.get(position);
 
-        holder.txtFileName.setText(sylonFile.getName());
+        holder.txtFileName.setText(document.getName());
 
         holder.btnEdit.setOnClickListener(v -> {
-            SylonFile sf = fileList.get(holder.getAdapterPosition());
+            Document sf = fileList.get(holder.getAdapterPosition());
 
             int sID = sf.getId();
             String sName = sf.getName();
@@ -66,9 +69,6 @@ public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapte
 
                 String uName = edtText.getText().toString();
                 database.fileDao().update(sID, uName);
-//                fileList.clear();
-//                fileList.addAll(database.fileDao().getAll());
-//                notifyDataSetChanged();
                 int pos = holder.getAdapterPosition();
                 fileList.set(pos, database.fileDao().getById(sID));
                 notifyItemChanged(pos);
@@ -76,7 +76,7 @@ public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapte
         });
 
         holder.btnDelete.setOnClickListener(v -> {
-            SylonFile sf = fileList.get(holder.getAdapterPosition());
+            Document sf = fileList.get(holder.getAdapterPosition());
 
             int sID = sf.getId();
             String sName = sf.getName();
@@ -92,11 +92,9 @@ public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapte
             Button btnDelete = dialog.findViewById(R.id.btnDelete);
             Button btnCancel = dialog.findViewById(R.id.btnCancel);
 
-            // TODO: set text of txtMessage to show the current filename (sName)
+            txtMessage.setText(context.getResources().getString(R.string.dialog_delete_file_msg_name, sName));
 
-            btnCancel.setOnClickListener(dv -> {
-                dialog.dismiss();
-            });
+            btnCancel.setOnClickListener(dv -> dialog.dismiss());
 
             btnDelete.setOnClickListener(dv -> {
                 dialog.dismiss();
