@@ -11,7 +11,9 @@
         android:id="@+id/edtText"
         android:hint="@string/enter_new_name"
         android:padding="12dp"
-        android:lines="1"
+        android:maxLines="1"
+        android:inputType="text"
+        android:importantForAutofill="no"
         android:gravity="top"
         android:background="@android:drawable/editbox_background"/>
 

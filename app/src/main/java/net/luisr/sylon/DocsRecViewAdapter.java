@@ -2,7 +2,6 @@ package net.luisr.sylon;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Formatter;
 import java.util.List;
-import java.util.Locale;
 
 public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.ViewHolder> {
 
@@ -46,72 +43,75 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         holder.txtFileName.setText(document.getName());
 
-        holder.btnEdit.setOnClickListener(v -> {
-            Document sf = fileList.get(holder.getAdapterPosition());
-
-            int sID = sf.getId();
-            String sName = sf.getName();
-
-            Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.dialog_edit_file_name);
-            int w = WindowManager.LayoutParams.MATCH_PARENT;
-            int h = WindowManager.LayoutParams.WRAP_CONTENT;
-            dialog.getWindow().setLayout(w, h);
-            dialog.show();
-
-            EditText edtText = dialog.findViewById(R.id.edtText);
-            Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
-
-            edtText.setText(sName);
-
-            btnUpdate.setOnClickListener(dv -> {
-                dialog.dismiss();
-
-                String uName = edtText.getText().toString();
-                database.fileDao().update(sID, uName);
-                int pos = holder.getAdapterPosition();
-                fileList.set(pos, database.fileDao().getById(sID));
-                notifyItemChanged(pos);
-            });
-        });
-
-        holder.btnDelete.setOnClickListener(v -> {
-            Document sf = fileList.get(holder.getAdapterPosition());
-
-            int sID = sf.getId();
-            String sName = sf.getName();
-
-            Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.dialog_delete_file);
-            int w = WindowManager.LayoutParams.MATCH_PARENT;
-            int h = WindowManager.LayoutParams.WRAP_CONTENT;
-            dialog.getWindow().setLayout(w, h);
-            dialog.show();
-
-            TextView txtMessage = dialog.findViewById(R.id.txtMessage);
-            Button btnDelete = dialog.findViewById(R.id.btnDelete);
-            Button btnCancel = dialog.findViewById(R.id.btnCancel);
-
-            txtMessage.setText(context.getResources().getString(R.string.dialog_delete_file_msg_name, sName));
-
-            btnCancel.setOnClickListener(dv -> dialog.dismiss());
-
-            btnDelete.setOnClickListener(dv -> {
-                dialog.dismiss();
-
-                database.fileDao().delete(sf);
-                int pos = holder.getAdapterPosition();
-                fileList.remove(pos);
-                notifyItemRemoved(pos);
-                notifyItemRangeChanged(pos, fileList.size());
-            });
-
-        });
+        holder.btnEdit.setOnClickListener(v -> btnEditCallback(document, position));
+        holder.btnDelete.setOnClickListener(v -> btnDeleteCallback(document, position));
     }
 
     @Override
     public int getItemCount() {
         return fileList.size();
+    }
+
+    private void btnEditCallback(Document document, int position) {
+        int sID = document.getId();
+        String sName = document.getName();
+
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dialog_edit_file_name);
+        int w = WindowManager.LayoutParams.MATCH_PARENT;
+        int h = WindowManager.LayoutParams.WRAP_CONTENT;
+        dialog.getWindow().setLayout(w, h);
+        dialog.show();
+
+        EditText edtText = dialog.findViewById(R.id.edtText);
+        Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
+
+        edtText.setText(sName);
+
+        edtText.setOnEditorActionListener((textView, i, keyEvent) -> {
+            dialog.dismiss();
+            btnUpdateCallback(sID, edtText.getText().toString().trim(), position);
+            return false;
+        });
+        btnUpdate.setOnClickListener(dv -> {
+            dialog.dismiss();
+            btnUpdateCallback(sID, edtText.getText().toString().trim(), position);
+        });
+    }
+
+    private void btnUpdateCallback(int id, String name, int position) {
+        database.docDao().update(id, name);
+        fileList.set(position, database.docDao().getById(id));
+        notifyItemChanged(position);
+    }
+
+    private void btnDeleteCallback(Document document, int position) {
+        int sID = document.getId();
+        String sName = document.getName();
+
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dialog_delete_file);
+        int w = WindowManager.LayoutParams.MATCH_PARENT;
+        int h = WindowManager.LayoutParams.WRAP_CONTENT;
+        dialog.getWindow().setLayout(w, h);
+        dialog.show();
+
+        TextView txtMessage = dialog.findViewById(R.id.txtMessage);
+        Button btnDelete = dialog.findViewById(R.id.btnDelete);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        txtMessage.setText(context.getResources().getString(R.string.dialog_delete_file_msg_name, sName));
+
+        btnCancel.setOnClickListener(dv -> dialog.dismiss());
+
+        btnDelete.setOnClickListener(dv -> {
+            dialog.dismiss();
+
+            database.docDao().delete(document);
+            fileList.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, fileList.size());
+        });
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

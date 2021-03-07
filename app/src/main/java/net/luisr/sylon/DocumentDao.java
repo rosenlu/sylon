@@ -18,16 +18,13 @@ public interface DocumentDao {
     @Delete
     void delete(Document document);
 
-    @Delete
-    void reset(List<Document> documentList);
-
-    @Query("UPDATE table_file SET name = :sName WHERE id = :sID")
+    @Query("UPDATE documents SET name = :sName WHERE id = :sID")
     void update(int sID, String sName);
 
-    @Query("SELECT * FROM table_file")
+    @Query("SELECT * FROM documents")
     List<Document> getAll();
 
-    @Query("SELECT * FROM table_file WHERE id = :sID LIMIT 1")
+    @Query("SELECT * FROM documents WHERE id = :sID LIMIT 1")
     Document getById(int sID);
 
 }

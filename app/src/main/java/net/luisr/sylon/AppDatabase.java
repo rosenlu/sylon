@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase database;
-    private static String DATABASE_NAME = "database";
+    private final static String DATABASE_NAME = "database";
 
     public synchronized static AppDatabase getInstance(Context context) {
         if (database == null) {
@@ -22,6 +22,6 @@ public abstract class AppDatabase extends RoomDatabase {
         return database;
     }
 
-    public abstract DocumentDao fileDao();
+    public abstract DocumentDao docDao();
 
 }
