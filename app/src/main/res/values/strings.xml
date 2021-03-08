@@ -13,4 +13,6 @@
     <string name="document_name">Document Name</string>
     <string name="change_name">Change name</string>
     <string name="first_page">First page</string>
+    <string name="page">Page</string>
+    <string name="page_number">Page number</string>
 </resources>

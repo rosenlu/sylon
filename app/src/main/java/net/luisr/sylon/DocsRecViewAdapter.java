@@ -2,6 +2,7 @@ package net.luisr.sylon;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +15,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
+
 import java.util.List;
 
 public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.ViewHolder> {
 
-    private List<Document> fileList;
+    private List<Document> docList;
     private Activity context;
     private AppDatabase database;
 
     public DocsRecViewAdapter(Activity context, List<Document> fileList) {
-        this.fileList = fileList;
+        this.docList = fileList;
         this.context = context;
         notifyDataSetChanged();
     }
@@ -39,7 +42,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     @Override
     public void onBindViewHolder(@NonNull DocsRecViewAdapter.ViewHolder holder, int position) {
         database = AppDatabase.getInstance(context);
-        Document document = fileList.get(position);
+        Document document = docList.get(position);
 
         holder.txtFileName.setText(document.getName());
 
@@ -60,16 +63,22 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
             });
             popup.show();
         });
+
+        holder.cardViewParent.setOnClickListener(v -> {
+            Intent intent = new Intent(context.getBaseContext(), DocumentActivity.class);
+            intent.putExtra("EXTRA_DOCUMENT_ID", document.getId());
+            context.startActivity(intent);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return fileList.size();
+        return docList.size();
     }
 
     private void itemEditCallback(Document document, int position) {
-        int sID = document.getId();
-        String sName = document.getName();
+        int documentId = document.getId();
+        String documentName = document.getName();
 
         Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_edit_doc_name);
@@ -81,28 +90,28 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         EditText edtText = dialog.findViewById(R.id.edtText);
         Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
 
-        edtText.setText(sName);
+        edtText.setText(documentName);
 
         edtText.setOnEditorActionListener((textView, i, keyEvent) -> {
             dialog.dismiss();
-            btnUpdateCallback(sID, edtText.getText().toString().trim(), position);
+            btnUpdateCallback(documentId, edtText.getText().toString().trim(), position);
             return false;
         });
         btnUpdate.setOnClickListener(dv -> {
             dialog.dismiss();
-            btnUpdateCallback(sID, edtText.getText().toString().trim(), position);
+            btnUpdateCallback(documentId, edtText.getText().toString().trim(), position);
         });
     }
 
     private void btnUpdateCallback(int id, String name, int position) {
         database.docDao().update(id, name);
-        fileList.set(position, database.docDao().getById(id));
+        docList.set(position, database.docDao().getById(id));
         notifyItemChanged(position);
     }
 
     private void itemDeleteCallback(Document document, int position) {
-        int sID = document.getId();
-        String sName = document.getName();
+        int documentId = document.getId();
+        String documentName = document.getName();
 
         Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_delete_doc);
@@ -115,7 +124,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         Button btnDelete = dialog.findViewById(R.id.btnDelete);
         Button btnCancel = dialog.findViewById(R.id.btnCancel);
 
-        txtMessage.setText(context.getResources().getString(R.string.dialog_delete_file_msg_name, sName));
+        txtMessage.setText(context.getResources().getString(R.string.dialog_delete_file_msg_name, documentName));
 
         btnCancel.setOnClickListener(dv -> dialog.dismiss());
 
@@ -123,20 +132,22 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
             dialog.dismiss();
 
             database.docDao().delete(document);
-            fileList.remove(position);
+            docList.remove(position);
             notifyItemRemoved(position);
-            notifyItemRangeChanged(position, fileList.size());
+            notifyItemRangeChanged(position, docList.size());
         });
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtFileName, txtViewOptions;
+        MaterialCardView cardViewParent;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             txtFileName = itemView.findViewById(R.id.txtFileName);
             txtViewOptions = itemView.findViewById(R.id.txtViewOptions);
+            cardViewParent = itemView.findViewById(R.id.cardViewParent);
         }
     }
 }

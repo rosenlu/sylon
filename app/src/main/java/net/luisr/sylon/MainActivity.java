@@ -17,10 +17,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<Document> fileList = new ArrayList<>();
+    List<Document> docList = new ArrayList<>();
     RecyclerView filesRecView;
     FloatingActionButton btnAdd;
-    LinearLayoutManager linearLayoutManager;
     DocsRecViewAdapter adapter;
     AppDatabase database;
 
@@ -33,11 +32,10 @@ public class MainActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btnAdd);
 
         database = AppDatabase.getInstance(this);
-        fileList = database.docDao().getAll();
+        docList = database.docDao().getAll();
 
-        linearLayoutManager = new LinearLayoutManager(this);
-        filesRecView.setLayoutManager(linearLayoutManager);
-        adapter = new DocsRecViewAdapter(MainActivity.this, fileList);
+        filesRecView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new DocsRecViewAdapter(MainActivity.this, docList);
         filesRecView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> btnAddCallback());
@@ -70,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
             Document sf = new Document(name);
             database.docDao().insert(sf);
 
-            fileList.clear();
-            fileList.addAll(database.docDao().getAll());
+            docList.clear();
+            docList.addAll(database.docDao().getAll());
             adapter.notifyDataSetChanged();
         }
     }
