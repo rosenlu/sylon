@@ -2,7 +2,6 @@ package net.luisr.sylon;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
@@ -20,6 +19,7 @@ public class DocumentActivity extends AppCompatActivity {
     FilesRecViewAdapter adapter;
     AppDatabase database;
     int documentId;
+    Document document;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class DocumentActivity extends AppCompatActivity {
         documentId = getIntent().getIntExtra("EXTRA_DOCUMENT_ID", -1);
         pageList = database.docDao().getPages(documentId);
 
-        Document document = database.docDao().getById(documentId);
+        document = database.docDao().getById(documentId);
         setTitle(document.getName());
 
         pagesRecView = findViewById(R.id.pagesRecView);
@@ -42,8 +42,12 @@ public class DocumentActivity extends AppCompatActivity {
         pagesRecView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> {
+            Page currentLastPage = database.docDao().getLastPage(documentId);
             Page page = new Page(documentId);
-            database.pageDao().insert(page);
+            Integer newPageId = (int) database.pageDao().insert(page);
+            if (currentLastPage != null) {
+                database.pageDao().setNextPageId(currentLastPage.getId(), newPageId);
+            }
 
             pageList.clear();
             pageList.addAll(database.docDao().getPages(documentId));

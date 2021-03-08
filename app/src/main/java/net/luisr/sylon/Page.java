@@ -1,6 +1,5 @@
 package net.luisr.sylon;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -12,7 +11,8 @@ import java.io.Serializable;
 @Entity(
         tableName = "pages",
         foreignKeys = {
-                @ForeignKey(entity = Document.class, parentColumns =  "id", childColumns = "document_id", onDelete = ForeignKey.CASCADE)
+                @ForeignKey(entity = Document.class, parentColumns = "id", childColumns = "document_id", onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Page.class, parentColumns = "id", childColumns = "next_page_id")
         },
         indices = {
                 @Index("document_id"),
@@ -32,6 +32,9 @@ public class Page implements Serializable {
 
     @ColumnInfo(name = "document_id")
     private int documentId;
+
+    @ColumnInfo(name = "next_page_id")
+    private Integer nextPageId;
 
     public int getId() {
         return id;
@@ -57,4 +60,11 @@ public class Page implements Serializable {
         this.documentId = documentId;
     }
 
+    public Integer getNextPageId() {
+        return nextPageId;
+    }
+
+    public void setNextPageId(Integer nextPageId) {
+        this.nextPageId = nextPageId;
+    }
 }

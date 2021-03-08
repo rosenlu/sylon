@@ -104,7 +104,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     }
 
     private void btnUpdateCallback(int id, String name, int position) {
-        database.docDao().update(id, name);
+        database.docDao().setName(id, name);
         docList.set(position, database.docDao().getById(id));
         notifyItemChanged(position);
     }

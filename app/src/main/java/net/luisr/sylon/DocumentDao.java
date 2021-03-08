@@ -19,7 +19,7 @@ public interface DocumentDao {
     void delete(Document document);
 
     @Query("UPDATE documents SET name = :name WHERE id = :id")
-    void update(int id, String name);
+    void setName(int id, String name);
 
     @Query("SELECT * FROM documents")
     List<Document> getAll();
@@ -32,5 +32,8 @@ public interface DocumentDao {
 
     @Query("SELECT COUNT(*) FROM pages WHERE document_id = :documentId")
     int getNumberOfPages(int documentId);
+
+    @Query("SELECT * FROM pages WHERE document_id = :documentId AND next_page_id ISNULL LIMIT 1")
+    Page getLastPage(int documentId);
 
 }

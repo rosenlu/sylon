@@ -13,13 +13,16 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 public interface PageDao {
 
     @Insert(onConflict = REPLACE)
-    void insert(Page page);
+    long insert(Page page);
 
     @Delete
     void delete(Page page);
 
     @Query("UPDATE pages SET image_path = :imagePath WHERE id = :id")
-    void update(int id, String imagePath);
+    void setImagePath(int id, String imagePath);
+
+    @Query("UPDATE pages SET next_page_id = :nextPageId WHERE id = :id")
+    void setNextPageId(int id, Integer nextPageId);
 
     @Query("SELECT * FROM pages")
     List<Page> getAll();
