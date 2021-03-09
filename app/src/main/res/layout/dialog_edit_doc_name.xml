@@ -14,8 +14,7 @@
         android:maxLines="1"
         android:inputType="text"
         android:importantForAutofill="no"
-        android:gravity="top"
-        android:background="@android:drawable/editbox_background"/>
+        android:gravity="top"/>
 
     <Button
         android:layout_width="match_parent"
