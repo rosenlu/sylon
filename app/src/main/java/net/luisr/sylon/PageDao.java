@@ -10,38 +10,42 @@ import java.util.List;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
-public abstract class PageDao {
-
-    int insert (Page page) {
-        int documentId = page.getDocumentId();
-        Page currentLastPage = _getLastPage(documentId);
-        int newPageId = (int) _insert(page);
-        if (currentLastPage != null) {
-            setNextPageId(currentLastPage.getId(), newPageId);
-        }
-
-        return newPageId;
-    }
+public interface PageDao {
 
     @Insert(onConflict = REPLACE)
-    abstract long _insert(Page page);
+    long insert(Page page);
 
     @Query("SELECT * FROM pages WHERE document_id = :documentId AND next_page_id ISNULL LIMIT 1")
-    abstract Page _getLastPage(int documentId);
+    Page getLastPage(int documentId);
 
     @Delete
-    abstract void delete(Page page);
+    void delete(Page page);
 
     @Query("UPDATE pages SET image_path = :imagePath WHERE id = :id")
-    abstract void setImagePath(int id, String imagePath);
+    void setImagePath(int id, String imagePath);
 
     @Query("UPDATE pages SET next_page_id = :nextPageId WHERE id = :id")
-    abstract void setNextPageId(int id, Integer nextPageId);
+    void setNextPageId(int id, Integer nextPageId);
 
     @Query("SELECT * FROM pages")
-    abstract List<Page> getAll();
+    List<Page> getAll();
 
     @Query("SELECT * FROM pages WHERE id = :id LIMIT 1")
-    abstract Page getById(int id);
+    Page getById(int id);
+
+    @Query("SELECT COUNT(*) FROM pages WHERE document_id = :documentId")
+    int getNumberOfPagesInDocument(int documentId);
+
+    @Query("SELECT * FROM pages WHERE document_id = :documentId AND next_page_id ISNULL LIMIT 1")
+    Page getLastPageInDocument(int documentId);
+
+    @Query("SELECT * FROM pages WHERE document_id = :documentId")
+    List<Page> getPagesInDocument(int documentId);
+
+    @Query("SELECT id FROM pages WHERE document_id = :documentId")
+    List<Integer> getIDsOfPagesInDocument(int documentId);
+
+    @Query("SELECT next_page_id FROM pages WHERE document_id = :documentId")
+    List<Integer> getNextIDsOfPagesInDocument(int documentId);
 
 }

@@ -66,7 +66,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         holder.cardViewParent.setOnClickListener(v -> {
             Intent intent = new Intent(context.getBaseContext(), DocumentActivity.class);
-            intent.putExtra("EXTRA_DOCUMENT_ID", document.getId());
+            intent.putExtra(DocumentActivity.INTENT_EXTRA_DOCUMENT_ID, document.getId());
             context.startActivity(intent);
         });
     }

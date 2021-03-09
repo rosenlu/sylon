@@ -8,18 +8,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 
-public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapter.ViewHolder> {
+public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapter.ViewHolder> {
 
-    private List<Page> pageList;
+    private final List<Page> pageList;
     private Activity context;
-    private AppDatabase database;
 
-    public FilesRecViewAdapter(Activity context, List<Page> pageList) {
+    public PagesRecViewAdapter(Activity context, List<Page> pageList) {
         this.pageList = pageList;
         this.context = context;
         notifyDataSetChanged();
@@ -35,10 +35,8 @@ public class FilesRecViewAdapter extends RecyclerView.Adapter<FilesRecViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        database = AppDatabase.getInstance(context);
         Page page = pageList.get(position);
-
-
+        holder.txtPageNumber.setText(context.getResources().getString(R.string.page_number, position+1, page.getId()));
     }
 
     @Override

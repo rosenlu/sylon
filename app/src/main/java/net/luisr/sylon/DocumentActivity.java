@@ -15,11 +15,13 @@ import java.util.List;
 
 public class DocumentActivity extends AppCompatActivity {
 
+    public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
+
     List<Page> pageList = new ArrayList<>();
     RecyclerView pagesRecView;
     FloatingActionButton btnAdd, btnAddByCamera, btnAddByGallery;
     boolean isFabOpen;
-    FilesRecViewAdapter adapter;
+    PagesRecViewAdapter adapter;
     AppDatabase database;
     int documentId;
     Document document;
@@ -31,8 +33,8 @@ public class DocumentActivity extends AppCompatActivity {
 
         database = AppDatabase.getInstance(this);
 
-        documentId = getIntent().getIntExtra("EXTRA_DOCUMENT_ID", -1);
-        pageList = database.docDao().getPages(documentId);
+        documentId = getIntent().getIntExtra(INTENT_EXTRA_DOCUMENT_ID, -1);
+        pageList = getOrderedPageList();
 
         document = database.docDao().getById(documentId);
         setTitle(document.getName());
@@ -44,7 +46,7 @@ public class DocumentActivity extends AppCompatActivity {
         isFabOpen = false;
 
         pagesRecView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new FilesRecViewAdapter(DocumentActivity.this, pageList);
+        adapter = new PagesRecViewAdapter(DocumentActivity.this, pageList);
         pagesRecView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> {
@@ -57,10 +59,9 @@ public class DocumentActivity extends AppCompatActivity {
 
         btnAddByCamera.setOnClickListener(v -> {
             Page page = new Page(documentId);
-            database.pageDao().insert(page);
+            page.setId(insertPage(page));
 
-            pageList.clear();
-            pageList.addAll(database.docDao().getPages(documentId));
+            pageList.add(page);
             adapter.notifyDataSetChanged();
         });
 
@@ -97,5 +98,39 @@ public class DocumentActivity extends AppCompatActivity {
 
         btnAddByCamera.animate().alpha(0);
         btnAddByGallery.animate().alpha(0);
+    }
+
+    private List<Page> getOrderedPageList() {
+        List<Page> orderedPageList = new ArrayList<>();
+        List<Integer> allIDs = database.pageDao().getIDsOfPagesInDocument(documentId);
+
+        allIDs.removeAll(database.pageDao().getNextIDsOfPagesInDocument(documentId));
+
+        if (!allIDs.isEmpty()) {
+            Integer next = allIDs.get(0);
+
+            Page pg;
+
+            while (next != null) {
+                pg = database.pageDao().getById(next);
+                orderedPageList.add(pg);
+                next = pg.getNextPageId();
+            }
+        }
+
+        return orderedPageList;
+    }
+
+
+
+    int insertPage(Page page) {
+        int documentId = page.getDocumentId();
+        Page currentLastPage = database.pageDao().getLastPage(documentId);
+        int newPageId = (int) database.pageDao().insert(page);
+        if (currentLastPage != null) {
+            database.pageDao().setNextPageId(currentLastPage.getId(), newPageId);
+        }
+
+        return newPageId;
     }
 }
