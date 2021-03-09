@@ -12,6 +12,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CameraActivity extends AppCompatActivity {
+    public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.image_uri";
+
     private static final String TAG = "Sylon";
 
     private static final int REQUEST_CODE_CAMERA = 10;
@@ -59,10 +62,11 @@ public class CameraActivity extends AppCompatActivity {
         File outputDirectory = getOutputDirectory();
         imgDirectory = new File(outputDirectory, "img");
         pdfDirectory = new File(outputDirectory, "pdf");
-        if (!imgDirectory.exists() || !pdfDirectory.exists()) {
-            if (!imgDirectory.mkdirs() || !pdfDirectory.mkdirs()) {
-                Log.w(TAG, "Could not create subdirs.");
-            }
+        if (!imgDirectory.mkdirs() || !imgDirectory.exists()) {
+            Log.w(TAG, "Could not create img subdir.");
+        }
+        if (!pdfDirectory.mkdirs() || !pdfDirectory.exists()) {
+            Log.w(TAG, "Could not create pdf subdir.");
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor();
@@ -102,8 +106,12 @@ public class CameraActivity extends AppCompatActivity {
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 String savedUri = Uri.fromFile(outputFile).toString();
                 String msg = "Image " + savedUri + " saved successfully!";
-                runOnUiThread(() -> Toast.makeText(CameraActivity.this, msg, Toast.LENGTH_SHORT).show());
                 Log.d(TAG, msg);
+
+                Intent intent = new Intent();
+                intent.putExtra(INTENT_EXTRA_IMAGE_URI, savedUri);
+                setResult(RESULT_OK, intent);
+                finish();
             }
 
             @Override

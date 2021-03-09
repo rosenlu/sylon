@@ -1,9 +1,11 @@
 package net.luisr.sylon;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -16,6 +18,8 @@ import java.util.List;
 public class DocumentActivity extends AppCompatActivity {
 
     public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
+    private static final int CAMERA_REQUEST_CODE = 1;
+
 
     List<Page> pageList = new ArrayList<>();
     RecyclerView pagesRecView;
@@ -58,11 +62,9 @@ public class DocumentActivity extends AppCompatActivity {
         });
 
         btnAddByCamera.setOnClickListener(v -> {
-            Page page = new Page(documentId);
-            page.setId(insertPage(page));
-
-            pageList.add(page);
-            adapter.notifyDataSetChanged();
+            Intent intent = new Intent(this, CameraActivity.class);
+            intent.putExtra(DocumentActivity.INTENT_EXTRA_DOCUMENT_ID, document.getId());
+            startActivityForResult(intent, CAMERA_REQUEST_CODE);
         });
 
         btnAddByGallery.setOnClickListener(v -> Toast.makeText(this, "Not implemented", Toast.LENGTH_SHORT).show());
@@ -121,16 +123,27 @@ public class DocumentActivity extends AppCompatActivity {
         return orderedPageList;
     }
 
-
-
-    int insertPage(Page page) {
-        int documentId = page.getDocumentId();
+    private void insertPage(Page page) {
         Page currentLastPage = database.pageDao().getLastPage(documentId);
         int newPageId = (int) database.pageDao().insert(page);
         if (currentLastPage != null) {
             database.pageDao().setNextPageId(currentLastPage.getId(), newPageId);
         }
 
-        return newPageId;
+        page.setId(newPageId);
+        pageList.add(page);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (resultCode == RESULT_OK && data != null) {
+                Page page = new Page(documentId);
+                page.setImagePath(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
+                insertPage(page);
+            }
+        }
     }
 }
