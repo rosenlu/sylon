@@ -42,12 +42,8 @@ public class DocumentActivity extends AppCompatActivity {
         pagesRecView.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v -> {
-            Page currentLastPage = database.docDao().getLastPage(documentId);
             Page page = new Page(documentId);
-            Integer newPageId = (int) database.pageDao().insert(page);
-            if (currentLastPage != null) {
-                database.pageDao().setNextPageId(currentLastPage.getId(), newPageId);
-            }
+            database.pageDao().insert(page);
 
             pageList.clear();
             pageList.addAll(database.docDao().getPages(documentId));

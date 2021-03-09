@@ -10,24 +10,38 @@ import java.util.List;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
-public interface PageDao {
+public abstract class PageDao {
+
+    int insert (Page page) {
+        int documentId = page.getDocumentId();
+        Page currentLastPage = _getLastPage(documentId);
+        int newPageId = (int) _insert(page);
+        if (currentLastPage != null) {
+            setNextPageId(currentLastPage.getId(), newPageId);
+        }
+
+        return newPageId;
+    }
 
     @Insert(onConflict = REPLACE)
-    long insert(Page page);
+    abstract long _insert(Page page);
+
+    @Query("SELECT * FROM pages WHERE document_id = :documentId AND next_page_id ISNULL LIMIT 1")
+    abstract Page _getLastPage(int documentId);
 
     @Delete
-    void delete(Page page);
+    abstract void delete(Page page);
 
     @Query("UPDATE pages SET image_path = :imagePath WHERE id = :id")
-    void setImagePath(int id, String imagePath);
+    abstract void setImagePath(int id, String imagePath);
 
     @Query("UPDATE pages SET next_page_id = :nextPageId WHERE id = :id")
-    void setNextPageId(int id, Integer nextPageId);
+    abstract void setNextPageId(int id, Integer nextPageId);
 
     @Query("SELECT * FROM pages")
-    List<Page> getAll();
+    abstract List<Page> getAll();
 
     @Query("SELECT * FROM pages WHERE id = :id LIMIT 1")
-    Page getById(int id);
+    abstract Page getById(int id);
 
 }
