@@ -55,7 +55,7 @@ public class DocumentActivity extends AppCompatActivity {
         btnAddByGallery = findViewById(R.id.btnAddByGallery);
         isFabOpen = false;
 
-        pagesRecView.setLayoutManager(new GridLayoutManager(this, 2));
+        pagesRecView.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new PagesRecViewAdapter(DocumentActivity.this, pageList);
         pagesRecView.setAdapter(adapter);
 
