@@ -42,7 +42,7 @@ public interface PageDao {
     @Query("SELECT * FROM pages WHERE document_id = :documentId")
     List<Page> getPagesInDocument(int documentId);
 
-    @Query("SELECT SUM(id) - SUM(next_page_id) FROM pages WHERE document_id = :documentId")
+    @Query("SELECT SUM(id) - IFNULL(SUM(next_page_id),0) FROM pages WHERE document_id = :documentId")
     Integer getFirstPageIdInDocument(int documentId);
 
 }
