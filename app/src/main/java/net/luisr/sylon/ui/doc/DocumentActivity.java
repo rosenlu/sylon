@@ -1,8 +1,10 @@
 package net.luisr.sylon.ui.doc;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -28,13 +30,17 @@ public class DocumentActivity extends AppCompatActivity {
 
 
     private List<Page> pageList = new ArrayList<>();
+    private AppDatabase database;
+    private Document document;
+    private int documentId;
+    private boolean isFabOpen;
+
+
     private RecyclerView pagesRecView;
     private FloatingActionButton btnAdd, btnAddByCamera, btnAddByGallery;
-    private boolean isFabOpen;
     private PagesRecViewAdapter adapter;
-    private AppDatabase database;
-    private int documentId;
-    private Document document;
+    private ItemTouchHelper pagesTouchHelper;
+    private ItemTouchHelper.Callback pagesTouchCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,29 @@ public class DocumentActivity extends AppCompatActivity {
         });
 
         btnAddByGallery.setOnClickListener(v -> Toast.makeText(this, "Not implemented", Toast.LENGTH_SHORT).show());
+
+        pagesTouchCallback = new ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN |
+                        ItemTouchHelper.START | ItemTouchHelper.END, 0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                int from = viewHolder.getAdapterPosition();
+                int to = target.getAdapterPosition();
+                PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
+                movePage(from, to);
+                pagesAdapter.notifyItemMoved(from, to);
+                pagesAdapter.notifyDataSetChanged();
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+        };
+
+        pagesTouchHelper = new ItemTouchHelper(pagesTouchCallback);
+        pagesTouchHelper.attachToRecyclerView(pagesRecView);
     }
 
     private void showFabMenu() {
@@ -145,5 +174,18 @@ public class DocumentActivity extends AppCompatActivity {
                 insertPage(page);
             }
         }
+    }
+
+    private void movePage(int fromPosition, int toPosition) {
+        System.out.println("from "+fromPosition+" to "+toPosition);
+
+        // TODO modify pageList and database to reflect reorder
+        /*
+        Page pageToMove = pageList.get(fromPosition);
+        Page pageInFrontOfNewSpot = pageList.get(toPosition);
+        for (Page p : pageList) {
+
+        }
+        */
     }
 }
