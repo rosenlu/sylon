@@ -3,12 +3,14 @@ package net.luisr.sylon.ui.main;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ import com.google.android.material.card.MaterialCardView;
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
+import net.luisr.sylon.db.Page;
 import net.luisr.sylon.ui.doc.DocumentActivity;
 
 import java.util.List;
@@ -50,6 +53,12 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         Document document = docList.get(position);
 
         holder.txtFileName.setText(document.getName());
+
+        Integer firstPageId = database.pageDao().getFirstPageIdInDocument(document.getId());
+        if (firstPageId != null) {
+            Page firstPage = database.pageDao().getById(firstPageId);
+            holder.imgViewFirstPage.setImageURI(Uri.parse(firstPage.getImagePath()));
+        }
 
         holder.txtViewOptions.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(context, holder.txtViewOptions);
@@ -146,6 +155,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtFileName, txtViewOptions;
         MaterialCardView cardViewParent;
+        ImageView imgViewFirstPage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -153,6 +163,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
             txtFileName = itemView.findViewById(R.id.txtFileName);
             txtViewOptions = itemView.findViewById(R.id.txtViewOptions);
             cardViewParent = itemView.findViewById(R.id.cardViewParent);
+            imgViewFirstPage = itemView.findViewById(R.id.imgViewFirstPage);
         }
     }
 }
