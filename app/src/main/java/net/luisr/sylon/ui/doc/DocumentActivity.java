@@ -110,20 +110,14 @@ public class DocumentActivity extends AppCompatActivity {
 
     private List<Page> getOrderedPageList() {
         List<Page> orderedPageList = new ArrayList<>();
-        List<Integer> allIDs = database.pageDao().getIDsOfPagesInDocument(documentId);
+        Integer next = database.pageDao().getFirstPageIdInDocument(documentId);
 
-        allIDs.removeAll(database.pageDao().getNextIDsOfPagesInDocument(documentId));
+        Page pg;
 
-        if (!allIDs.isEmpty()) {
-            Integer next = allIDs.get(0);
-
-            Page pg;
-
-            while (next != null) {
-                pg = database.pageDao().getById(next);
-                orderedPageList.add(pg);
-                next = pg.getNextPageId();
-            }
+        while (next != null) {
+            pg = database.pageDao().getById(next);
+            orderedPageList.add(pg);
+            next = pg.getNextPageId();
         }
 
         return orderedPageList;
