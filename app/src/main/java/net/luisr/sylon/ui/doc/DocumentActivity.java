@@ -27,14 +27,14 @@ public class DocumentActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST_CODE = 1;
 
 
-    List<Page> pageList = new ArrayList<>();
-    RecyclerView pagesRecView;
-    FloatingActionButton btnAdd, btnAddByCamera, btnAddByGallery;
-    boolean isFabOpen;
-    PagesRecViewAdapter adapter;
-    AppDatabase database;
-    int documentId;
-    Document document;
+    private List<Page> pageList = new ArrayList<>();
+    private RecyclerView pagesRecView;
+    private FloatingActionButton btnAdd, btnAddByCamera, btnAddByGallery;
+    private boolean isFabOpen;
+    private PagesRecViewAdapter adapter;
+    private AppDatabase database;
+    private int documentId;
+    private Document document;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

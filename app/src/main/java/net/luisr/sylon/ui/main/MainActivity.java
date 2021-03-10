@@ -21,11 +21,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<Document> docList = new ArrayList<>();
-    RecyclerView filesRecView;
-    FloatingActionButton btnAdd;
-    DocsRecViewAdapter adapter;
-    AppDatabase database;
+    private List<Document> docList = new ArrayList<>();
+    private RecyclerView filesRecView;
+    private FloatingActionButton btnAdd;
+    private DocsRecViewAdapter adapter;
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
