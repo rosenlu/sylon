@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.ui.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,6 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import net.luisr.sylon.R;
+import net.luisr.sylon.db.AppDatabase;
+import net.luisr.sylon.db.Document;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.ui.main;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -16,6 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+
+import net.luisr.sylon.R;
+import net.luisr.sylon.db.AppDatabase;
+import net.luisr.sylon.db.Document;
+import net.luisr.sylon.ui.doc.DocumentActivity;
 
 import java.util.List;
 

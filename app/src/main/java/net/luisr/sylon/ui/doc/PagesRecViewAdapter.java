@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.ui.doc;
 
 import android.app.Activity;
 import android.net.Uri;
@@ -9,8 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
+
+import net.luisr.sylon.R;
+import net.luisr.sylon.db.Page;
 
 import java.util.List;
 

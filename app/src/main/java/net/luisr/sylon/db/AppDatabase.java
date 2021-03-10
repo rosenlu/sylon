@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.db;
 
 import android.content.Context;
 

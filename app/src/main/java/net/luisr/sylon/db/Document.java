@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.db;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;

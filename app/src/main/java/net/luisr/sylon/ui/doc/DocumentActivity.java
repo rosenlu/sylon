@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.ui.doc;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +11,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import net.luisr.sylon.R;
+import net.luisr.sylon.db.AppDatabase;
+import net.luisr.sylon.db.Document;
+import net.luisr.sylon.db.Page;
+import net.luisr.sylon.ui.acquisition.CameraActivity;
 
 import java.util.ArrayList;
 import java.util.List;

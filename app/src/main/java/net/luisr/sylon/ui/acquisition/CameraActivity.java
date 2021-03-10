@@ -1,4 +1,4 @@
-package net.luisr.sylon;
+package net.luisr.sylon.ui.acquisition;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +20,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import net.luisr.sylon.R;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
