@@ -91,7 +91,7 @@ public class DocumentActivity extends AppCompatActivity {
                 PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
                 movePage(from, to);
                 pagesAdapter.notifyItemMoved(from, to);
-                pagesAdapter.notifyDataSetChanged();
+                //pagesAdapter.notifyDataSetChanged();
                 return true;
             }
 
