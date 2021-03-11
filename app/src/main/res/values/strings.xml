@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Sylon</string>
-    <string name="test_message">Ja Servus. Ich bin es</string>
     <string name="permissions_denied">Mensch</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
@@ -15,4 +14,6 @@
     <string name="first_page">First page</string>
     <string name="page">Page</string>
     <string name="page_number">%d (ID %d)</string>
+    <string name="snapshot">Take image</string>
+    <string name="tricolon">&#8942;</string>
 </resources>
