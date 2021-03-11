@@ -37,30 +37,6 @@ public interface PageDao {
     void update(Page... pages);
 
     /**
-     * Get a Page entity by its ID.
-     * @param id the ID of the page.
-     * @return the Page.
-     */
-    @Query("SELECT * FROM pages WHERE id = :id LIMIT 1")
-    Page getById(int id);
-
-    /**
-     * Update the URI of the image associated with the Page.
-     * @param id the ID of the page.
-     * @param imageUri the new URI of the image.
-     */
-    @Query("UPDATE pages SET image_uri = :imageUri WHERE id = :id")
-    void setImageUri(int id, String imageUri);
-
-    /**
-     * Update the number of a page in the document.
-     * @param id the ID of the page.
-     * @param pageNumber the new number of the page.
-     */
-    @Query("UPDATE pages SET page_number = :pageNumber WHERE id = :id")
-    void setPageNumber(int id, Integer pageNumber);
-
-    /**
      * Get the number of Pages inside a Document.
      * @param documentId the ID of the Document.
      * @return the number of Pages in the Document.
@@ -84,23 +60,4 @@ public interface PageDao {
     @Query("SELECT * FROM pages WHERE document_id = :documentId AND page_number = 0 LIMIT 1")
     Page getFirstPageInDocument(int documentId);
 
-    /**
-     * Increment the page numbers of Pages in a Document between two positions by one.
-     * Convenience function used to update page numbers when moving a page to a lower position.
-     * @param documentId the ID of the Document.
-     * @param fromPosition the position from which the Page is moved.
-     * @param toPosition the position to which the Page is moved.
-     */
-    @Query("UPDATE pages SET page_number = page_number + 1 WHERE document_id = :documentId AND page_number >= :toPosition AND page_number < :fromPosition")
-    void incrementPageNumbersInDocumentByOne(int documentId, int fromPosition, int toPosition);
-
-    /**
-     * Reduce the page numbers of Pages in a Document between two positions by one.
-     * Convenience function used to update page numbers when moving a page to a higher position.
-     * @param documentId the ID of the Document.
-     * @param fromPosition the position from which the Page is moved.
-     * @param toPosition the position to which the Page is moved.
-     */
-    @Query("UPDATE pages SET page_number = page_number - 1 WHERE document_id = :documentId AND page_number > :fromPosition AND page_number <= :toPosition")
-    void reducePageNumbersInDocumentByOne(int documentId, int fromPosition, int toPosition);
 }

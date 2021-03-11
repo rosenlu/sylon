@@ -80,10 +80,6 @@ public class Page implements Serializable {
         return documentId;
     }
 
-    public void setDocumentId(int documentId) {
-        this.documentId = documentId;
-    }
-
     public int getPageNumber() {
         return pageNumber;
     }

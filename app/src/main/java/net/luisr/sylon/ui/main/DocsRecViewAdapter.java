@@ -126,7 +126,6 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     }
 
     private void itemDeleteCallback(Document document, int position) {
-        int documentId = document.getId();
         String documentName = document.getName();
 
         Dialog dialog = new Dialog(context);
