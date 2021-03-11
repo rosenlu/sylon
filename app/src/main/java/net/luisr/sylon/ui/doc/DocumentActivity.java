@@ -185,7 +185,7 @@ public class DocumentActivity extends AppCompatActivity {
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
                 Page page = new Page(documentId);
-                page.setImagePath(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
+                page.setImageUri(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
                 insertPage(page);
             }
         }

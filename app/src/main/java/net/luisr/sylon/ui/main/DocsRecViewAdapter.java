@@ -56,7 +56,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         Page firstPage = database.pageDao().getFirstPageInDocument(document.getId());
         if (firstPage != null) {
-            String imgPath = firstPage.getImagePath();
+            String imgPath = firstPage.getImageUri();
             if (imgPath != null) {
                 holder.imgViewFirstPage.setImageURI(Uri.parse(imgPath));
             }

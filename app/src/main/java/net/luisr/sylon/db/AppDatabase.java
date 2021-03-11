@@ -10,9 +10,12 @@ import androidx.room.RoomDatabase;
  * The app's database.
  *
  * The database has two tables, documents and pages, that are related in a one-to-many relationship.
- *
  * Each of the tables has it's own DAO, docDao and pageDao, that is responsible for getting and
  * setting data in the respective table.
+ * @see Document
+ * @see DocumentDao
+ * @see Page
+ * @see PageDao
  */
 @Database(entities = {Document.class, Page.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {

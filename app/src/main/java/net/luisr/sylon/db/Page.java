@@ -1,5 +1,6 @@
 package net.luisr.sylon.db;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -8,6 +9,10 @@ import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
+/**
+ * Page. Class that defines the structure of the pages table in the AppDatabase.
+ * @see AppDatabase
+ */
 @Entity(
         tableName = "pages",
         foreignKeys = {
@@ -19,19 +24,27 @@ import java.io.Serializable;
 )
 public class Page implements Serializable {
 
+    /**
+     * Constructor for Page.
+     * @param documentId the ID of the parent document.
+     */
     public Page(int documentId) {
         this.documentId = documentId;
     }
 
+    /** Unique ID of the Page. */
     @PrimaryKey(autoGenerate = true)
     private int id;
-    
-    @ColumnInfo(name = "image_path")
-    private String imagePath;
 
+    /** The URI of the image associated with the page. */
+    @ColumnInfo(name = "image_uri")
+    private String imageUri;
+
+    /** The ID of the parent document. */
     @ColumnInfo(name = "document_id")
     private int documentId;
 
+    /** The number of the page in the document. Should be unique in each document. */
     @ColumnInfo(name = "page_number")
     private int pageNumber;
 
@@ -43,12 +56,12 @@ public class Page implements Serializable {
         this.id = id;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageUri() {
+        return imageUri;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
     }
 
     public int getDocumentId() {
@@ -68,6 +81,7 @@ public class Page implements Serializable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "Page{" +
                 "id=" + id +
