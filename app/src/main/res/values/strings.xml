@@ -15,5 +15,5 @@
     <string name="page">Page</string>
     <string name="page_number">%d (ID %d)</string>
     <string name="snapshot">Take image</string>
-    <string name="tricolon">&#8942;</string>
+    <string name="vertical_ellipsis">&#8942;</string>
 </resources>

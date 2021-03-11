@@ -41,7 +41,7 @@
             android:layout_alignParentTop="true"
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
-            android:text="@string/tricolon"
+            android:text="@string/vertical_ellipsis"
             android:textStyle="bold"
             android:textAppearance="?android:textAppearanceLarge"/>
 
