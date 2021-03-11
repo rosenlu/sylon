@@ -22,6 +22,7 @@ import net.luisr.sylon.ui.acquisition.CameraActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DocumentActivity extends AppCompatActivity {
 
@@ -79,7 +80,9 @@ public class DocumentActivity extends AppCompatActivity {
             startActivityForResult(intent, CAMERA_REQUEST_CODE);
         });
 
-        btnAddByGallery.setOnClickListener(v -> Toast.makeText(this, "Not implemented", Toast.LENGTH_SHORT).show());
+        btnAddByGallery.setOnClickListener(v -> {
+            Toast.makeText(this, "Not implemented", Toast.LENGTH_SHORT).show();
+        });
 
         pagesTouchCallback = new ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP | ItemTouchHelper.DOWN |
@@ -92,7 +95,9 @@ public class DocumentActivity extends AppCompatActivity {
             public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
                 super.onSelectedChanged(viewHolder, actionState);
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                    fromPosition = viewHolder.getAdapterPosition();
+                    if (viewHolder != null) {
+                        fromPosition = viewHolder.getAdapterPosition();
+                    }
                 }
             }
 
@@ -101,7 +106,9 @@ public class DocumentActivity extends AppCompatActivity {
                 int localFromPosition = viewHolder.getAdapterPosition();
                 toPosition = target.getAdapterPosition();
                 PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
-                pagesAdapter.notifyItemMoved(localFromPosition, toPosition);
+                if (pagesAdapter != null) {
+                    pagesAdapter.notifyItemMoved(localFromPosition, toPosition);
+                }
                 return true;
             }
 
@@ -115,21 +122,8 @@ public class DocumentActivity extends AppCompatActivity {
                 super.clearView(recyclerView, viewHolder);
 
                 if(fromPosition != -1 && toPosition != -1 && fromPosition != toPosition) {
-                    movePagesInDatabaseAndUpdatePageList();
-                    PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
-                    pagesAdapter.notifyDataSetChanged();
+                    movePage(fromPosition, toPosition);
                 }
-            }
-
-            private void movePagesInDatabaseAndUpdatePageList() {
-                Page pageToMove = pageList.get(fromPosition);
-
-                // TODO: Move in database. Use functions incrementPageNumbersInDocumentByOne and
-                //       reducePageNumbersInDocumentByOne from PageDao
-
-                // move page in pageList
-                pageToMove = pageList.remove(fromPosition);
-                pageList.add(toPosition, pageToMove);
             }
         };
 
@@ -170,12 +164,25 @@ public class DocumentActivity extends AppCompatActivity {
     }
 
     private void insertPage(Page page) {
-        int numOfPages = database.pageDao().getNumberOfPagesInDocument(documentId);
-        page.setPageNumber(numOfPages + 1);
-        int newPageId = (int) database.pageDao().insert(page);
-
-        page.setId(newPageId);
         pageList.add(page);
+        page.setPageNumber(pageList.indexOf(page));
+        adapter.notifyDataSetChanged();
+    }
+
+    private void movePage(int from, int to) {
+        Page page = pageList.remove(from);
+        pageList.add(to, page);
+        if (from > to) {
+            for (int i = to; i <= from; i++) {
+                pageList.get(i).setPageNumber(i);
+                pageList.get(i).setModified(true);
+            }
+        } else if (to > from) {
+            for (int i = from; i <= to; i++) {
+                pageList.get(i).setPageNumber(i);
+                pageList.get(i).setModified(true);
+            }
+        }
         adapter.notifyDataSetChanged();
     }
 
@@ -184,10 +191,21 @@ public class DocumentActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                Page page = new Page(documentId);
+                Page page = Page.makeNew(documentId);
                 page.setImageUri(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
                 insertPage(page);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        database.pageDao().update(pageList.stream().filter(Page::wasModified).toArray(Page[]::new));
+        database.pageDao().insert(pageList.stream().filter(Page::getNew).toArray(Page[]::new));
+
+        pageList.stream().filter(Page::wasModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
+        pageList.stream().filter(Page::getNew).collect(Collectors.toList()).forEach(Page::clearNew);
     }
 }

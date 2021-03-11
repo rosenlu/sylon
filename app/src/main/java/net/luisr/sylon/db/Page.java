@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -24,12 +25,23 @@ import java.io.Serializable;
 )
 public class Page implements Serializable {
 
+    @Ignore
+    private boolean modified, isNew;
+
     /**
      * Constructor for Page.
      * @param documentId the ID of the parent document.
      */
     public Page(int documentId) {
         this.documentId = documentId;
+        modified = false;
+        isNew = false;
+    }
+
+    public static Page makeNew(int documentId) {
+        Page p = new Page(documentId);
+        p.setNew();
+        return p;
     }
 
     /** Unique ID of the Page. */
@@ -78,6 +90,25 @@ public class Page implements Serializable {
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
+    }
+
+    private void setNew() {
+        isNew = true;
+    }
+    public void clearNew() {
+        isNew = false;
+    }
+
+    public boolean getNew() {
+        return isNew;
+    }
+
+    public void setModified(boolean value) {
+        modified = value;
+    }
+
+    public boolean wasModified() {
+        return modified;
     }
 
     @Override

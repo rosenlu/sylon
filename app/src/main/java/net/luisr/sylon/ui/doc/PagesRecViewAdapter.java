@@ -39,7 +39,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Page page = pageList.get(position);
-        holder.txtPageNumber.setText(context.getResources().getString(R.string.page_number, position+1, page.getId()));
+        holder.txtPageNumber.setText(context.getResources().getString(R.string.page_number, position, page.getId()));
         String imgUri = page.getImageUri();
         if (imgUri != null) {
             holder.imgViewPage.setImageURI(Uri.parse(imgUri));

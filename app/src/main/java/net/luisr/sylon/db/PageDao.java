@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -18,19 +19,22 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 public interface PageDao {
 
     /**
-     * Insert a Page entity into the database.
-     * @param page the Page to insert.
+     * Insert one or more Page entities into the database.
+     * @param pages the Page(s) to insert.
      * @return the ID of the newly added Page.
      */
     @Insert(onConflict = REPLACE)
-    long insert(Page page);
+    long[] insert(Page... pages);
 
     /**
-     * Delete a Page entity from the database.
-     * @param page the Page to delete.
+     * Delete one or more Page entities from the database.
+     * @param pages the Page(s) to delete.
      */
     @Delete
-    void delete(Page page);
+    void delete(Page... pages);
+
+    @Update
+    void update(Page... pages);
 
     /**
      * Get a Page entity by its ID.
@@ -77,7 +81,7 @@ public interface PageDao {
      * @param documentId the ID of the Document.
      * @return the first Page in the Document.
      */
-    @Query("SELECT * FROM pages WHERE document_id = :documentId AND page_number = 1 LIMIT 1")
+    @Query("SELECT * FROM pages WHERE document_id = :documentId AND page_number = 0 LIMIT 1")
     Page getFirstPageInDocument(int documentId);
 
     /**
