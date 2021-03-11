@@ -67,4 +67,12 @@ public class Page implements Serializable {
     public void setNextPageId(Integer nextPageId) {
         this.nextPageId = nextPageId;
     }
+
+    @Override
+    public String toString() {
+        return "Page{" +
+                "id=" + id +
+                ", documentId=" + documentId +
+                '}';
+    }
 }

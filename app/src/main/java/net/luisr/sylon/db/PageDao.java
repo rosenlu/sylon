@@ -45,4 +45,6 @@ public interface PageDao {
     @Query("SELECT SUM(id) - IFNULL(SUM(next_page_id),0) FROM pages WHERE document_id = :documentId")
     Integer getFirstPageIdInDocument(int documentId);
 
+    @Query("SELECT id FROM pages WHERE next_page_id = :id LIMIT 1")
+    Integer getPreviousPageId(int id);
 }

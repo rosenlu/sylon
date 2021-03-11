@@ -43,4 +43,12 @@ public class Document implements Serializable {
     public void setName(String name) {
         this.name = name.replaceAll("[\\\\/:*?\"<>|]", "");
     }
+
+    @Override
+    public String toString() {
+        return "Document{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

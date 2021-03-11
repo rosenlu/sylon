@@ -84,20 +84,98 @@ public class DocumentActivity extends AppCompatActivity {
         pagesTouchCallback = new ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP | ItemTouchHelper.DOWN |
                         ItemTouchHelper.START | ItemTouchHelper.END, 0) {
+
+            int fromPosition;
+            int toPosition;
+
+            @Override
+            public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+                super.onSelectedChanged(viewHolder, actionState);
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    fromPosition = viewHolder.getAdapterPosition();
+                }
+            }
+
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                int from = viewHolder.getAdapterPosition();
-                int to = target.getAdapterPosition();
+                int localFromPosition = viewHolder.getAdapterPosition();
+                toPosition = target.getAdapterPosition();
                 PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
-                movePage(from, to);
-                pagesAdapter.notifyItemMoved(from, to);
-                //pagesAdapter.notifyDataSetChanged();
+                pagesAdapter.notifyItemMoved(localFromPosition, toPosition);
                 return true;
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
+            }
+
+            @Override
+            public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+
+                if(fromPosition != -1 && toPosition != -1 && fromPosition != toPosition) {
+                    movePagesInDatabaseAndPageList();
+                    PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
+                    pagesAdapter.notifyDataSetChanged();
+                }
+            }
+
+            private void movePagesInDatabaseAndPageList() {
+                Page pageToMove = pageList.get(fromPosition);
+
+                Page pageInFrontOfNewSpot;
+                Integer pageIdBehindNewSpot;
+                Page pageInFrontOfOldSpot;
+                Integer pageIdBehindOldSpot;
+
+                // move page in database
+                if (fromPosition > toPosition) {
+                    // update pageToMove
+                    pageIdBehindNewSpot = pageList.get(toPosition).getId();
+                    updatePageInDatabaseAndPageList(pageToMove, fromPosition, pageIdBehindNewSpot);
+
+                    // update pageInFrontOfNewSpot
+                    Integer pageIdInFrontOfNewSpot = database.pageDao().getPreviousPageId(pageIdBehindNewSpot);
+                    if (pageIdInFrontOfNewSpot != null) {
+                        pageInFrontOfNewSpot = database.pageDao().getById(pageIdInFrontOfNewSpot);
+                        updatePageInDatabaseAndPageList(pageInFrontOfNewSpot, toPosition - 1, pageToMove.getId());
+                    }
+
+                    // update pageInFrontOfOldSpot
+                    pageIdBehindOldSpot = pageToMove.getNextPageId();
+                    Integer pageIdInFrontOfOldSpot = database.pageDao().getPreviousPageId(pageToMove.getId());
+                    pageInFrontOfOldSpot = database.pageDao().getById(pageIdInFrontOfOldSpot);
+                    updatePageInDatabaseAndPageList(pageInFrontOfOldSpot, fromPosition - 1, pageIdBehindOldSpot);
+
+                } else {
+                    // update pageInfFrontOfNewSpot
+                    pageInFrontOfNewSpot = pageList.get(toPosition);
+                    updatePageInDatabaseAndPageList(pageInFrontOfNewSpot, toPosition, pageToMove.getId());
+
+                    // update pageToMove
+                    pageIdBehindNewSpot = pageInFrontOfNewSpot.getNextPageId();
+                    updatePageInDatabaseAndPageList(pageToMove, fromPosition, pageIdBehindNewSpot);
+
+                    // update pageInFrontOfOldSpot
+                    pageIdBehindOldSpot = pageToMove.getNextPageId();
+                    Integer pageIdInFrontOfOldSpot = database.pageDao().getPreviousPageId(pageToMove.getId());
+                    if (pageIdInFrontOfOldSpot != null) {
+                        pageInFrontOfOldSpot = database.pageDao().getById(pageIdInFrontOfOldSpot);
+                        updatePageInDatabaseAndPageList(pageInFrontOfOldSpot, fromPosition - 1, pageIdBehindOldSpot);
+                    }
+
+                }
+
+                // move page in pageList
+                pageToMove = pageList.remove(fromPosition);
+                pageList.add(toPosition, pageToMove);
+            }
+
+            private void updatePageInDatabaseAndPageList(Page page, int posInPageList, Integer nextPageId) {
+                database.pageDao().setNextPageId(page.getId(), nextPageId);
+                page.setNextPageId(nextPageId);
+                pageList.set(posInPageList, page);
             }
         };
 
@@ -174,18 +252,5 @@ public class DocumentActivity extends AppCompatActivity {
                 insertPage(page);
             }
         }
-    }
-
-    private void movePage(int fromPosition, int toPosition) {
-        System.out.println("from "+fromPosition+" to "+toPosition);
-
-        // TODO modify pageList and database to reflect reorder
-        /*
-        Page pageToMove = pageList.get(fromPosition);
-        Page pageInFrontOfNewSpot = pageList.get(toPosition);
-        for (Page p : pageList) {
-
-        }
-        */
     }
 }
