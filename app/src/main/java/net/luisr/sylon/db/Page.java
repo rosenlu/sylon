@@ -12,7 +12,6 @@ import java.io.Serializable;
         tableName = "pages",
         foreignKeys = {
                 @ForeignKey(entity = Document.class, parentColumns = "id", childColumns = "document_id", onDelete = ForeignKey.CASCADE),
-                @ForeignKey(entity = Page.class, parentColumns = "id", childColumns = "next_page_id")
         },
         indices = {
                 @Index("document_id"),
@@ -33,8 +32,8 @@ public class Page implements Serializable {
     @ColumnInfo(name = "document_id")
     private int documentId;
 
-    @ColumnInfo(name = "next_page_id")
-    private Integer nextPageId;
+    @ColumnInfo(name = "page_number")
+    private int pageNumber;
 
     public int getId() {
         return id;
@@ -60,12 +59,12 @@ public class Page implements Serializable {
         this.documentId = documentId;
     }
 
-    public Integer getNextPageId() {
-        return nextPageId;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
-    public void setNextPageId(Integer nextPageId) {
-        this.nextPageId = nextPageId;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
     @Override

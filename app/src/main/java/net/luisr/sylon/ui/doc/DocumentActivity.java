@@ -50,7 +50,7 @@ public class DocumentActivity extends AppCompatActivity {
         database = AppDatabase.getInstance(this);
 
         documentId = getIntent().getIntExtra(INTENT_EXTRA_DOCUMENT_ID, -1);
-        pageList = getOrderedPageList();
+        pageList = database.pageDao().getPagesInDocument(documentId);
 
         document = database.docDao().getById(documentId);
         setTitle(document.getName());
@@ -115,67 +115,21 @@ public class DocumentActivity extends AppCompatActivity {
                 super.clearView(recyclerView, viewHolder);
 
                 if(fromPosition != -1 && toPosition != -1 && fromPosition != toPosition) {
-                    movePagesInDatabaseAndPageList();
+                    movePagesInDatabaseAndUpdatePageList();
                     PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
                     pagesAdapter.notifyDataSetChanged();
                 }
             }
 
-            private void movePagesInDatabaseAndPageList() {
+            private void movePagesInDatabaseAndUpdatePageList() {
                 Page pageToMove = pageList.get(fromPosition);
 
-                Page pageInFrontOfNewSpot;
-                Integer pageIdBehindNewSpot;
-                Page pageInFrontOfOldSpot;
-                Integer pageIdBehindOldSpot;
-
-                // move page in database
-                if (fromPosition > toPosition) {
-                    // update pageToMove
-                    pageIdBehindNewSpot = pageList.get(toPosition).getId();
-                    updatePageInDatabaseAndPageList(pageToMove, fromPosition, pageIdBehindNewSpot);
-
-                    // update pageInFrontOfNewSpot
-                    Integer pageIdInFrontOfNewSpot = database.pageDao().getPreviousPageId(pageIdBehindNewSpot);
-                    if (pageIdInFrontOfNewSpot != null) {
-                        pageInFrontOfNewSpot = database.pageDao().getById(pageIdInFrontOfNewSpot);
-                        updatePageInDatabaseAndPageList(pageInFrontOfNewSpot, toPosition - 1, pageToMove.getId());
-                    }
-
-                    // update pageInFrontOfOldSpot
-                    pageIdBehindOldSpot = pageToMove.getNextPageId();
-                    Integer pageIdInFrontOfOldSpot = database.pageDao().getPreviousPageId(pageToMove.getId());
-                    pageInFrontOfOldSpot = database.pageDao().getById(pageIdInFrontOfOldSpot);
-                    updatePageInDatabaseAndPageList(pageInFrontOfOldSpot, fromPosition - 1, pageIdBehindOldSpot);
-
-                } else {
-                    // update pageInfFrontOfNewSpot
-                    pageInFrontOfNewSpot = pageList.get(toPosition);
-                    updatePageInDatabaseAndPageList(pageInFrontOfNewSpot, toPosition, pageToMove.getId());
-
-                    // update pageToMove
-                    pageIdBehindNewSpot = pageInFrontOfNewSpot.getNextPageId();
-                    updatePageInDatabaseAndPageList(pageToMove, fromPosition, pageIdBehindNewSpot);
-
-                    // update pageInFrontOfOldSpot
-                    pageIdBehindOldSpot = pageToMove.getNextPageId();
-                    Integer pageIdInFrontOfOldSpot = database.pageDao().getPreviousPageId(pageToMove.getId());
-                    if (pageIdInFrontOfOldSpot != null) {
-                        pageInFrontOfOldSpot = database.pageDao().getById(pageIdInFrontOfOldSpot);
-                        updatePageInDatabaseAndPageList(pageInFrontOfOldSpot, fromPosition - 1, pageIdBehindOldSpot);
-                    }
-
-                }
+                // TODO: Move in database. Use functions incrementPageNumbersInDocumentByOne and
+                //       reducePageNumbersInDocumentByOne from PageDao
 
                 // move page in pageList
                 pageToMove = pageList.remove(fromPosition);
                 pageList.add(toPosition, pageToMove);
-            }
-
-            private void updatePageInDatabaseAndPageList(Page page, int posInPageList, Integer nextPageId) {
-                database.pageDao().setNextPageId(page.getId(), nextPageId);
-                page.setNextPageId(nextPageId);
-                pageList.set(posInPageList, page);
             }
         };
 
@@ -215,27 +169,10 @@ public class DocumentActivity extends AppCompatActivity {
         btnAddByGallery.animate().alpha(0);
     }
 
-    private List<Page> getOrderedPageList() {
-        List<Page> orderedPageList = new ArrayList<>();
-        Integer next = database.pageDao().getFirstPageIdInDocument(documentId);
-
-        Page pg;
-
-        while (next != null) {
-            pg = database.pageDao().getById(next);
-            orderedPageList.add(pg);
-            next = pg.getNextPageId();
-        }
-
-        return orderedPageList;
-    }
-
     private void insertPage(Page page) {
-        Page currentLastPage = database.pageDao().getLastPage(documentId);
+        int numOfPages = database.pageDao().getNumberOfPagesInDocument(documentId);
+        page.setPageNumber(numOfPages + 1);
         int newPageId = (int) database.pageDao().insert(page);
-        if (currentLastPage != null) {
-            database.pageDao().setNextPageId(currentLastPage.getId(), newPageId);
-        }
 
         page.setId(newPageId);
         pageList.add(page);
