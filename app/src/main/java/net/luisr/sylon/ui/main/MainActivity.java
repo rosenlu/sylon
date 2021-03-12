@@ -27,26 +27,16 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity {
 
-    /**
-     * The app's database containing all documents and pages.
-     * @see AppDatabase
-     */
+    /** The app's database containing all documents and pages. */
     private AppDatabase database;
 
-    /**
-     * A list containing all documents.
-     * The list is passed to the docsRecView.
-     * @see Document
-     */
+    /** A list containing all documents. The list is passed to the docsRecView. */
     private List<Document> docList = new ArrayList<>();
 
     /** A RecyclerView showing all the documents in the docList. */
     private RecyclerView docsRecView;
 
-    /**
-     * The RecyclerView.Adapter for the docsRecView.
-     * @see DocsRecViewAdapter
-     */
+    /** The RecyclerView.Adapter for the docsRecView. */
     private DocsRecViewAdapter adapter;
 
     /** A button to create a new document */

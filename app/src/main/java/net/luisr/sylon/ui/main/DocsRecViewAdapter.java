@@ -43,16 +43,10 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     /** The activity from which the adapter was created. */
     private final Activity context;
 
-    /**
-     * A list containing all the documents to be shown in the RecyclerView.
-     * @see Document
-     */
+    /** A list containing all the documents to be shown in the RecyclerView. */
     private final List<Document> docList;
 
-    /**
-     * The app's database.
-     * @see AppDatabase
-     */
+    /** The app's database. */
     private AppDatabase database;
 
     /**
