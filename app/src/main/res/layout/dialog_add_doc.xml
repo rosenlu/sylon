@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/edtText"
-        android:hint="@string/enter_file_name"
+        android:hint="@string/enter_doc_name"
         android:padding="12dp"
         android:maxLines="1"
         android:inputType="text"

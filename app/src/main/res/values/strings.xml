@@ -3,9 +3,9 @@
     <string name="permissions_denied">Mensch</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-    <string name="dialog_delete_file_msg">Are you sure you want to delete this document?</string>
-    <string name="dialog_delete_file_msg_name">Are you sure you want to delete the document \"%s\"?</string>
-    <string name="enter_file_name">Enter file name</string>
+    <string name="dialog_delete_doc_msg">Are you sure you want to delete this document?</string>
+    <string name="dialog_delete_doc_msg_name">Are you sure you want to delete the document \"%s\"?</string>
+    <string name="enter_doc_name">Enter name of document</string>
     <string name="add">Add</string>
     <string name="enter_new_name">Enter new name</string>
     <string name="update">Update</string>
@@ -16,4 +16,5 @@
     <string name="page_number">%d (ID %d)</string>
     <string name="snapshot">Take image</string>
     <string name="vertical_ellipsis">&#8942;</string>
+    <string name="empty_doc_name_msg">Document name cannot be empty.</string>
 </resources>

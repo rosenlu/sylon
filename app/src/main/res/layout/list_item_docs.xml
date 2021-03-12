@@ -30,7 +30,7 @@
             android:layout_toStartOf="@id/txtViewOptions"
             android:text="@string/document_name"
             android:textSize="16sp"
-            android:id="@+id/txtFileName"
+            android:id="@+id/txtDocName"
             android:textStyle="bold"/>
 
         <TextView
