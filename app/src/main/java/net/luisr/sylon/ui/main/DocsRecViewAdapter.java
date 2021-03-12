@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -176,9 +177,18 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
      * @param position the current position of the ViewHolder.
      */
     private void btnUpdateCallback(int id, String name, int position) {
-        database.docDao().setName(id, name);
-        docList.set(position, database.docDao().getById(id));
-        notifyItemChanged(position);
+        // name should not be empty
+        if (!name.equals("")) {
+            // change name in database
+            database.docDao().setName(id, name);
+
+            // update doc in docList and notify adapter
+            docList.set(position, database.docDao().getById(id));
+            notifyItemChanged(position);
+        } else {
+            // show message that the doc name cannot be empty
+            Toast.makeText(context, context.getString(R.string.empty_doc_name_msg), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
