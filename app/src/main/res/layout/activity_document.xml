@@ -6,13 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.doc.DocumentActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pagesRecView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/list_item_pages"/>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddByGallery"
         android:layout_width="wrap_content"
@@ -25,6 +18,13 @@
         app:layout_constraintEnd_toEndOf="@+id/btnAdd"
         app:layout_constraintStart_toStartOf="@+id/btnAdd"
         app:layout_constraintTop_toTopOf="@+id/btnAdd" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pagesRecView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/list_item_pages"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddByCamera"
