@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Main Activity of the class.
+ * The Main Activity of the app.
  * This activity is the launcher activity and shows a list of all documents in the database.
  * Via a button, the user can add a document to the database.
  */
