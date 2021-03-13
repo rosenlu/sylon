@@ -25,8 +25,20 @@ import java.io.Serializable;
 )
 public class Page implements Serializable {
 
+    /** Indicate whether a Page instance has been modified or newly created. */
     @Ignore
     private boolean modified, isNew;
+
+    /**
+     * Static method to get a new page with it's 'isNew' attribute set to true.
+     * @param documentId the ID of the parent document.
+     * @return the newly created page.
+     */
+    public static Page makeNew(int documentId) {
+        Page p = new Page(documentId);
+        p.setNew();
+        return p;
+    }
 
     /**
      * Constructor for Page.
@@ -36,12 +48,6 @@ public class Page implements Serializable {
         this.documentId = documentId;
         modified = false;
         isNew = false;
-    }
-
-    public static Page makeNew(int documentId) {
-        Page p = new Page(documentId);
-        p.setNew();
-        return p;
     }
 
     /** Unique ID of the Page. */
@@ -59,6 +65,31 @@ public class Page implements Serializable {
     /** The number of the page in the document. Should be unique in each document. */
     @ColumnInfo(name = "page_number")
     private int pageNumber;
+
+    /** Set the isNew attribute of the Page to true. */
+    private void setNew() {
+        isNew = true;
+    }
+
+    /** Set the isNew attribute of the Page to false. */
+    public void clearNew() {
+        isNew = false;
+    }
+
+    /** Getter for the 'isNew' attribute */
+    public boolean isNew() {
+        return isNew;
+    }
+
+    /** Setter for the 'modified' attribute */
+    public void setModified(boolean value) {
+        modified = value;
+    }
+
+    /** Getter for the 'modified' attribute */
+    public boolean hasBeenModified() {
+        return modified;
+    }
 
     public int getId() {
         return id;
@@ -86,25 +117,6 @@ public class Page implements Serializable {
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
-    }
-
-    private void setNew() {
-        isNew = true;
-    }
-    public void clearNew() {
-        isNew = false;
-    }
-
-    public boolean getNew() {
-        return isNew;
-    }
-
-    public void setModified(boolean value) {
-        modified = value;
-    }
-
-    public boolean wasModified() {
-        return modified;
     }
 
     @Override

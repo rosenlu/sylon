@@ -33,6 +33,10 @@ public interface PageDao {
     @Delete
     void delete(Page... pages);
 
+    /**
+     * Update one or more Page entities in the database.
+     * @param pages the Page(s) to update.
+     */
     @Update
     void update(Page... pages);
 

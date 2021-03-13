@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -251,11 +250,11 @@ public class DocumentActivity extends AppCompatActivity {
         super.onPause();
 
         // update modified pages and insert new pages to database
-        database.pageDao().update(pageList.stream().filter(Page::wasModified).toArray(Page[]::new));
-        database.pageDao().insert(pageList.stream().filter(Page::getNew).toArray(Page[]::new));
+        database.pageDao().update(pageList.stream().filter(Page::hasBeenModified).toArray(Page[]::new));
+        database.pageDao().insert(pageList.stream().filter(Page::isNew).toArray(Page[]::new));
 
         // reset values of "modified" and "isNew"
-        pageList.stream().filter(Page::wasModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
-        pageList.stream().filter(Page::getNew).collect(Collectors.toList()).forEach(Page::clearNew);
+        pageList.stream().filter(Page::hasBeenModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
+        pageList.stream().filter(Page::isNew).collect(Collectors.toList()).forEach(Page::clearNew);
     }
 }
