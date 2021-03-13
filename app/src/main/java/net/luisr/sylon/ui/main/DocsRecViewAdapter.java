@@ -223,6 +223,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         });
     }
 
+    /** The ViewHolder class extracts the UI elements from the layout. */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtDocName, txtViewOptions;
         MaterialCardView cardViewParent;
