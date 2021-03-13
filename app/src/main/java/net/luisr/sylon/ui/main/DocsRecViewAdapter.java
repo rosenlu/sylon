@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,8 +26,11 @@ import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
+import net.luisr.sylon.fs.FileManager;
+import net.luisr.sylon.ui.acquisition.CameraActivity;
 import net.luisr.sylon.ui.doc.DocumentActivity;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -39,6 +43,8 @@ import java.util.List;
  * @see Document
  */
 public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.ViewHolder> {
+    /** The tag used for logging */
+    private static final String TAG = "DocsRecViewAdapter";
 
     /** The activity from which the adapter was created. */
     private final Activity context;
@@ -214,13 +220,26 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         btnCancel.setOnClickListener(dv -> dialog.dismiss());
         btnDelete.setOnClickListener(dv -> {
             dialog.dismiss();
-
-            // delete document from database and docList
-            database.docDao().delete(document);
-            docList.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, docList.size());
+            confirmDeleteCallback(document, position);
         });
+    }
+
+    private void confirmDeleteCallback(Document document, int position) {
+        // delete all source images for the pages in the document
+        List<Page> pages = database.pageDao().getPagesInDocument(document.getId());
+        for (Page p : pages) {
+            Uri uri = Uri.parse(p.getImageUri());
+            if (!FileManager.rm(uri)) {
+                Log.w(TAG, "Could not delete source image: " + uri);
+            }
+        }
+
+        // delete document from database and docList
+        // pages are automatically deleted from database when parent document is deleted
+        database.docDao().delete(document);
+        docList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, docList.size());
     }
 
     /** The ViewHolder class extracts the UI elements from the layout. */
