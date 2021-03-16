@@ -137,7 +137,7 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 // Retrieve saved location
-                String savedUri = outputFileResults.getSavedUri().toString();
+                String savedUri = Uri.fromFile(outputFile).toString();
                 String msg = "Image " + savedUri + " saved successfully!";
                 System.out.println(msg);
 

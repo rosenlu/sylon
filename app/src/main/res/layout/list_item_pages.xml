@@ -6,7 +6,10 @@
     android:layout_margin="5dp"
     app:cardElevation="5dp"
     app:cardCornerRadius="5dp"
-    android:id="@+id/cardViewParent">
+    android:id="@+id/cardViewParent"
+    android:checkable="true"
+    android:clickable="true"
+    android:focusable="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
