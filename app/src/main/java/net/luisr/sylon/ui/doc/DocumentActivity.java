@@ -102,7 +102,6 @@ public class DocumentActivity extends AppCompatActivity {
         // start CameraActivity when camera icon is clicked
         btnAddByCamera.setOnClickListener(v -> {
             Intent intent = new Intent(this, CameraActivity.class);
-            intent.putExtra(DocumentActivity.INTENT_EXTRA_DOCUMENT_ID, document.getId());
             startActivityForResult(intent, CAMERA_REQUEST_CODE);
         });
 
