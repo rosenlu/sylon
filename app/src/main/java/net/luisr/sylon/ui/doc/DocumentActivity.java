@@ -15,6 +15,7 @@ import androidx.appcompat.view.ActionMode;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * An activity showing the details of a document.
  * The activity shows the name of the document as well as all the pages inside.
  */
-public class DocumentActivity extends AppCompatActivity implements ActionMode.Callback {
+public class DocumentActivity extends AppCompatActivity {
 
     public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
@@ -58,8 +59,10 @@ public class DocumentActivity extends AppCompatActivity implements ActionMode.Ca
     /** The RecyclerView.Adapter for the pagesRecView. */
     private PagesRecViewAdapter adapter;
 
+    /** The SelectionTracker keeping track of selected pages. */
     SelectionTracker<Long> pagesSelectionTracker;
 
+    /** The ActionMode that is activated when one or multiple pages are selected. */
     private ActionMode actionMode;
 
     /** The FloatingActionButtons (FABs) for the FAB menu */
@@ -99,31 +102,8 @@ public class DocumentActivity extends AppCompatActivity implements ActionMode.Ca
         ItemTouchHelper pagesTouchHelper = new ItemTouchHelper(getPagesTouchCallback());
         pagesTouchHelper.attachToRecyclerView(pagesRecView);
 
-        pagesSelectionTracker = new SelectionTracker.Builder<>(
-                PAGES_SELECTION_ID,
-                pagesRecView,
-                new PagesRecViewAdapter.KeyProvider(adapter),
-                new PagesRecViewAdapter.DetailsLookup(pagesRecView),
-                StorageStrategy.createLongStorage())
-            .withSelectionPredicate(SelectionPredicates.createSelectAnything())
-            .build();
-
-        adapter.setSelectionTracker(pagesSelectionTracker);
-        pagesSelectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
-            @Override
-            public void onSelectionChanged() {
-                super.onSelectionChanged();
-                if (pagesSelectionTracker.getSelection().size() > 0) {
-                    if (actionMode == null) {
-                        actionMode = startSupportActionMode(DocumentActivity.this);
-                    }
-                    actionMode.setTitle(String.valueOf(pagesSelectionTracker.getSelection().size()));
-                } else if (actionMode != null) {
-                    actionMode.finish();
-                }
-            }
-        });
-
+        // create and attach the SelectionTracker to Recycler view to allow selection pages
+        createAndAttachSelectionTracker();
     }
 
     /** Set on click listeners for the FAB menu. */
@@ -181,6 +161,72 @@ public class DocumentActivity extends AppCompatActivity implements ActionMode.Ca
         btnAddByGallery.animate().translationY(0);
         btnAddByCamera.animate().alpha(0);
         btnAddByGallery.animate().alpha(0);
+    }
+
+    /** Create the selection tracker, attach it to the adapter and add a selection observer. */
+    private void createAndAttachSelectionTracker() {
+        pagesSelectionTracker = new SelectionTracker.Builder<>(
+                PAGES_SELECTION_ID,
+                pagesRecView,
+                new PagesRecViewAdapter.KeyProvider(),
+                new PagesRecViewAdapter.DetailsLookup(pagesRecView),
+                StorageStrategy.createLongStorage())
+                .withSelectionPredicate(SelectionPredicates.createSelectAnything())
+                .build();
+        adapter.setSelectionTracker(pagesSelectionTracker);
+        pagesSelectionTracker.addObserver(getSelectionObserver());
+    }
+
+    /**
+     * Get the selection observer for the selection tracker.
+     * @return the selection observer.
+     */
+    private SelectionTracker.SelectionObserver<Long> getSelectionObserver() {
+        return new SelectionTracker.SelectionObserver<Long>() {
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                if (pagesSelectionTracker.getSelection().size() > 0) {
+                    if (actionMode == null) {
+                        actionMode = startSupportActionMode(getActionModeCallback());
+                        if (actionMode != null) {
+                            actionMode.setTitle(String.valueOf(pagesSelectionTracker.getSelection().size()));
+                        }
+                    }
+                } else if (actionMode != null) {
+                    actionMode.finish();
+                }
+            }
+        };
+    }
+
+    /**
+     * Get the the callback object for the pagesTouchHelper that enables selecting one or multiple pages.
+     * @return the callback object
+     */
+    private ActionMode.Callback getActionModeCallback() {
+        return new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                pagesSelectionTracker.clearSelection();
+                actionMode = null;
+            }
+        };
     }
 
     /**
@@ -293,26 +339,5 @@ public class DocumentActivity extends AppCompatActivity implements ActionMode.Ca
         // reset values of "modified" and "isNew"
         pageList.stream().filter(Page::hasBeenModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
         pageList.stream().filter(Page::isNew).collect(Collectors.toList()).forEach(Page::clearNew);
-    }
-
-    @Override
-    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-        return false;
-    }
-
-    @Override
-    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-        return false;
-    }
-
-    @Override
-    public void onDestroyActionMode(ActionMode actionMode) {
-        pagesSelectionTracker.clearSelection();
-        this.actionMode = null;
     }
 }
