@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.selection.ItemKeyProvider;
+import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
@@ -13,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.view.ActionMode;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,11 +28,16 @@ import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
+import net.luisr.sylon.fs.FileManager;
 import net.luisr.sylon.ui.acquisition.CameraActivity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * An activity showing the details of a document.
@@ -41,11 +49,17 @@ public class DocumentActivity extends AppCompatActivity {
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
     private static final int CAMERA_REQUEST_CODE = 1;
 
+    /** The tag used for logging */
+    private static final String TAG = "DocumentActivity";
+
     /** The app's database containing all documents and pages. */
     private AppDatabase database;
 
     /** A list containing all pages. The list is passed to the pagesRecView. */
     private List<Page> pageList = new ArrayList<>();
+
+    /** A list keeping track of all pages the user has deleted while the activity was running. */
+    private List<Page> deletedPageList = new ArrayList<>();
 
     /** The ID of the document for which the activity was started. */
     private int documentId;
@@ -208,6 +222,9 @@ public class DocumentActivity extends AppCompatActivity {
         return new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MenuInflater menuInflater = new MenuInflater(DocumentActivity.this);
+                menuInflater.inflate(R.menu.options_menu_page, menu);
+
                 return true;
             }
 
@@ -218,7 +235,50 @@ public class DocumentActivity extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return false;
+                int id = item.getItemId();
+                PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) pagesRecView.getAdapter();
+
+                // check if delete button has been pressed
+                if (id == R.id.itemDelete) {
+                    // get the currently selected items and iterate over them
+                    Selection<Long> selection = pagesSelectionTracker.getSelection();
+                    ArrayList<Long> keysToDelete = new ArrayList<>();
+                    for (Long key : selection) {
+                        keysToDelete.add(key);
+                    }
+                    keysToDelete.sort(Collections.reverseOrder());
+
+                    for (Long key : keysToDelete) {
+                        int position = (int) (long) key;
+
+                        // delete page in pageList, add it to deletedPageList and delete the source image
+                        Page page = pageList.remove(position);
+                        if (!page.isNew()) {
+                            deletedPageList.add(page);
+                        }
+                        Uri uri = Uri.parse(page.getImageUri());
+                        if (!FileManager.rm(uri)) {
+                            Log.w(TAG, "Could not delete source image: " + uri);
+                        }
+
+                        // update page numbers for all following pages
+                        for (int i = position; i < pageList.size(); i++) {
+                            pageList.get(i).setPageNumber(i);
+                            pageList.get(i).setModified(true);
+                        }
+
+                        // notify the adapter
+                        if (pagesAdapter != null) {
+                            pagesAdapter.notifyItemRemoved(position);
+                        }
+                    }
+
+                    // clear the selection and stop the actionMode
+                    pagesSelectionTracker.clearSelection();
+                    actionMode = null;
+                }
+
+                return true;
             }
 
             @Override
@@ -268,6 +328,10 @@ public class DocumentActivity extends AppCompatActivity {
                 if (pagesAdapter != null) {
                     pagesAdapter.notifyItemMoved(localFromPosition, toPosition);
                 }
+
+                // clear the selection
+                pagesSelectionTracker.clearSelection();
+                actionMode = null;
 
                 return true;
             }
@@ -333,9 +397,18 @@ public class DocumentActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        // update modified pages and insert new pages to database
+        // update modified pages, insert new pages to database and remove deleted pages from database
+        long[] newIds = database.pageDao().insert(pageList.stream().filter(Page::isNew).toArray(Page[]::new));
         database.pageDao().update(pageList.stream().filter(Page::hasBeenModified).toArray(Page[]::new));
-        database.pageDao().insert(pageList.stream().filter(Page::isNew).toArray(Page[]::new));
+        database.pageDao().delete(deletedPageList.toArray(new Page[0]));
+
+        // update new ids
+        int idx = 0;
+        for (Page p : pageList) {
+            if (p.isNew()) {
+                p.setId((int) newIds[idx++]);
+            }
+        }
 
         // reset values of "modified" and "isNew"
         pageList.stream().filter(Page::hasBeenModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
