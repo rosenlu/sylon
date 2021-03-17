@@ -252,6 +252,7 @@ public class DocumentActivity extends AppCompatActivity {
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     if (viewHolder != null) {
                         fromPosition = viewHolder.getAdapterPosition();
+                        toPosition = fromPosition;
                     }
                 }
             }
