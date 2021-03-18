@@ -11,14 +11,14 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:padding="@dimen/list_item_padding">
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="70dp"
+            android:layout_width="@dimen/first_page_width"
+            android:layout_height="@dimen/first_page_height"
             android:id="@+id/imgViewFirstPage"
             android:layout_alignParentStart="true"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="@dimen/list_item_padding"
             android:src="@drawable/ic_launcher_background"
             android:background="@drawable/image_view_border"
             android:contentDescription="@string/first_page"/>
@@ -39,9 +39,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
-            android:layout_marginEnd="-10dp"
-            android:layout_marginTop="-10dp"
-            android:padding="10dp"
+            android:layout_marginEnd="@dimen/list_item_padding_neg"
+            android:layout_marginTop="@dimen/list_item_padding_neg"
+            android:padding="@dimen/list_item_padding"
             android:src="@drawable/ic_baseline_more_vert_24"
             android:contentDescription="@string/vertical_ellipsis"
             android:textStyle="bold"
