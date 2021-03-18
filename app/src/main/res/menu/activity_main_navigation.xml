@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/itemDocuments"
+        android:title="@string/documents"
+        android:icon="@drawable/ic_baseline_format_list_bulleted_24" />
+    <item android:id="@+id/itemCamera"
+        android:title="@string/camera"
+        android:icon="@drawable/ic_baseline_camera_alt_24" />
+    <item android:id="@+id/itemGallery"
+        android:title="@string/gallery"
+        android:icon="@drawable/ic_baseline_insert_photo_24" />
+</menu>

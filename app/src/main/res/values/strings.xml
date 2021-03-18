@@ -10,6 +10,11 @@
     <string name="vertical_ellipsis">Vertical ellipsis</string>
 
     <!-- MainActivity -->
+    <string name="documents">Documents</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+
+    <!-- DocumentListFragment -->
     <string name="hint_no_documents">You have not created any documents yet.</string>
     <string name="hint_create_document">Click here to create one</string>
     <string name="first_page">First page of the document</string>
