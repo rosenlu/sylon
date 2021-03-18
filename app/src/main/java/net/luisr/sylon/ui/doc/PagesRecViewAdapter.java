@@ -1,7 +1,14 @@
 package net.luisr.sylon.ui.doc;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
 import android.telecom.Call;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.ItemKeyProvider;
@@ -23,9 +31,15 @@ import com.google.android.material.card.MaterialCardView;
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
+import net.luisr.sylon.fs.ImageRotationHandler;
 import net.luisr.sylon.ui.main.MainActivity;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+
+import static android.provider.MediaStore.Images.Media.getBitmap;
 
 /**
  * The RecyclerView.Adapter for the pagesRecView of the DocumentActivity.
@@ -95,6 +109,8 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         private final TextView txtPageNumber;
         private final MaterialCardView cardViewParent;
 
+        private Page page;
+
         /**
          * Constructor for the view holder. Gets all the UI elements from the layout.
          * @param itemView an item view.
@@ -120,15 +136,27 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
             // show the page number
             txtPageNumber.setText(context.getResources().getString(R.string.page_number, position, page.getId()));
 
+            this.page = page;
+
             // set the image preview
-            String imgUri = page.getImageUri();
-            if (imgUri != null) {
-                imgViewPage.setImageURI(Uri.parse(imgUri));
+            try {
+                setImagePreview();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             // set the selected pages as checked
             if (selectionTracker != null) {
                 cardViewParent.setChecked(selectionTracker.isSelected(details.getSelectionKey()));
+            }
+        }
+
+        private void setImagePreview() throws IOException {
+            Uri imgUri = Uri.parse(page.getImageUri());
+
+            if (imgUri != null) {
+                Bitmap rotatedBitmap = ImageRotationHandler.handleSamplingAndRotationBitmap(context, imgUri);
+                imgViewPage.setImageBitmap(rotatedBitmap);
             }
         }
 

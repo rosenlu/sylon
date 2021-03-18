@@ -3,6 +3,7 @@ package net.luisr.sylon.ui.main;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,8 +28,10 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
+import net.luisr.sylon.fs.ImageRotationHandler;
 import net.luisr.sylon.ui.doc.DocumentActivity;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -84,9 +87,14 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         // show a preview of the first page in the document, if it exists
         Page firstPage = database.pageDao().getFirstPageInDocument(document.getId());
         if (firstPage != null) {
-            String imgPath = firstPage.getImageUri();
-            if (imgPath != null) {
-                holder.imgViewFirstPage.setImageURI(Uri.parse(imgPath));
+            Uri imgUri = Uri.parse(firstPage.getImageUri());
+            if (imgUri != null) {
+                try {
+                    Bitmap rotatedBitmap = ImageRotationHandler.handleSamplingAndRotationBitmap(context, imgUri);
+                    holder.imgViewFirstPage.setImageBitmap(rotatedBitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
