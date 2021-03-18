@@ -27,10 +27,8 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
-import net.luisr.sylon.ui.acquisition.CameraActivity;
 import net.luisr.sylon.ui.doc.DocumentActivity;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -93,8 +91,8 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         }
 
         // set an OnClickListener for the txtViewOptions
-        holder.txtViewOptions.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(context, holder.txtViewOptions);
+        holder.imgViewMoreOptions.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(context, holder.imgViewMoreOptions);
             popup.inflate(R.menu.options_menu_document);
             popup.setOnMenuItemClickListener(item -> itemClickCallback(item, document, position));
             popup.show();
@@ -249,15 +247,15 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
     /** The ViewHolder class extracts the UI elements from the layout. */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView txtDocName, txtViewOptions;
+        TextView txtDocName;
         MaterialCardView cardViewParent;
-        ImageView imgViewFirstPage;
+        ImageView imgViewFirstPage, imgViewMoreOptions;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             txtDocName = itemView.findViewById(R.id.txtDocName);
-            txtViewOptions = itemView.findViewById(R.id.txtViewOptions);
+            imgViewMoreOptions = itemView.findViewById(R.id.imgViewMoreOptions);
             cardViewParent = itemView.findViewById(R.id.cardViewParent);
             imgViewFirstPage = itemView.findViewById(R.id.imgViewFirstPage);
         }

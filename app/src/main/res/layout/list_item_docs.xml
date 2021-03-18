@@ -27,39 +27,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/imgViewFirstPage"
-            android:layout_toStartOf="@id/txtViewOptions"
+            android:layout_toStartOf="@id/imgViewMoreOptions"
             android:text="@string/document_name"
             android:textSize="16sp"
             android:id="@+id/txtDocName"
             android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/txtViewOptions"
+        <ImageView
+            android:id="@+id/imgViewMoreOptions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
-            android:paddingEnd="10dp"
-            android:paddingStart="10dp"
-            android:text="@string/vertical_ellipsis"
+            android:layout_marginEnd="-10dp"
+            android:layout_marginTop="-10dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            android:contentDescription="@string/vertical_ellipsis"
             android:textStyle="bold"
             android:textAppearance="?android:textAppearanceLarge"/>
-
-
-<!--        <ImageView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:id="@+id/btnDelete"-->
-<!--            android:src="@drawable/ic_delete"-->
-<!--            android:layout_alignParentEnd="true"/>-->
-
-<!--        <ImageView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:id="@+id/btnEdit"-->
-<!--            android:src="@drawable/ic_edit"-->
-<!--            android:layout_toStartOf="@+id/btnDelete"-->
-<!--            android:layout_marginEnd="5dp"/>-->
 
     </RelativeLayout>
 

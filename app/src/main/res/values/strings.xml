@@ -7,6 +7,7 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="right_arrow">Right arrow</string>
+    <string name="vertical_ellipsis">Vertical ellipsis</string>
 
     <!-- MainActivity -->
     <string name="hint_no_documents">You have not created any documents yet.</string>
@@ -19,7 +20,6 @@
     <string name="empty_doc_name_msg">Document name cannot be empty.</string>
     <string name="dialog_delete_doc_msg">Are you sure you want to delete this document?</string>
     <string name="dialog_delete_doc_msg_name">Are you sure you want to delete the document \"%s\"?</string>
-    <string name="vertical_ellipsis">&#8942;</string>
 
     <!-- DocumentActivity -->
     <string name="hint_no_pages">This document does not contain any pages.</string>
