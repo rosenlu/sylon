@@ -230,6 +230,11 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         });
     }
 
+    /**
+     * Callback function for when the confirms the warning dialog created by deleteBtnCallback.
+     * @param document the document at the current position.
+     * @param position the current position of the ViewHolder.
+     */
     private void confirmDeleteCallback(Document document, int position) {
         // delete all source images for the pages in the document
         List<Page> pages = database.pageDao().getPagesInDocument(document.getId());
