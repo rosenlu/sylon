@@ -240,6 +240,11 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         docList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, docList.size());
+
+        // show hints, if docList is empty
+        if (docList.isEmpty()) {
+            ((MainActivity) context).groupNoDocuments.setVisibility(View.VISIBLE);
+        }
     }
 
     /** The ViewHolder class extracts the UI elements from the layout. */

@@ -50,4 +50,42 @@
         android:src="@drawable/ic_baseline_add_24"
         android:contentDescription="@string/add"/>
 
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/groupNoPages"
+        android:visibility="gone"
+        app:constraint_referenced_ids="txtViewNoPages,txtViewClickHere,imgViewRightArrow"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hint_no_pages"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/txtViewNoPages"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hint_create_page"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/btnAdd"
+        app:layout_constraintEnd_toStartOf="@id/imgViewRightArrow"
+        app:layout_constraintTop_toTopOf="@id/btnAdd"
+        android:id="@+id/txtViewClickHere"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_arrow_right_alt_24"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/btnAdd"
+        app:layout_constraintEnd_toStartOf="@id/btnAdd"
+        app:layout_constraintTop_toTopOf="@id/btnAdd"
+        android:contentDescription="@string/right_arrow"
+        android:id="@+id/imgViewRightArrow"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

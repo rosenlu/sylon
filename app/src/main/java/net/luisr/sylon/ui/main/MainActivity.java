@@ -1,11 +1,13 @@
 package net.luisr.sylon.ui.main;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.Group;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
     /** A button to create a new document */
     private FloatingActionButton btnAdd;
 
+    /**
+     * A group with all text and image views containing hints when no document is found.
+     * Is package-private, as DocsRecViewAdapter needs access to it.
+     */
+    Group groupNoDocuments;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,10 +58,16 @@ public class MainActivity extends AppCompatActivity {
         // get UI elements
         docsRecView = findViewById(R.id.docsRecView);
         btnAdd = findViewById(R.id.btnAdd);
+        groupNoDocuments = findViewById(R.id.groupNoDocuments);
 
         // get database and fill docList
         database = AppDatabase.getInstance(this);
         docList = database.docDao().getAll();
+
+        // show hints, if docList is empty
+        if (docList.isEmpty()) {
+            groupNoDocuments.setVisibility(View.VISIBLE);
+        }
 
         // set layout and adapter for docsRecView
         docsRecView.setLayoutManager(new LinearLayoutManager(this));
@@ -111,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
 
             // insert doc to database
             doc.setId((int) database.docDao().insert(doc));
+
+            // dismiss hints, if docList was empty
+            if (docList.isEmpty()) {
+                groupNoDocuments.setVisibility(View.GONE);
+            }
 
             // insert doc to docList and notify DocsRecViewAdapter
             docList.add(doc);

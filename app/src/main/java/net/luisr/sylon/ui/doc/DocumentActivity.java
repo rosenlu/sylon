@@ -3,6 +3,7 @@ package net.luisr.sylon.ui.doc;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.Group;
 import androidx.recyclerview.selection.ItemKeyProvider;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionPredicates;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -85,6 +87,9 @@ public class DocumentActivity extends AppCompatActivity {
     /** Contains the opening state of the FAB menu. */
     private boolean isFabOpen;
 
+    /** A group with all text and image views containing hints when no page is found. */
+    private Group groupNoPages;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +101,7 @@ public class DocumentActivity extends AppCompatActivity {
         btnAddByCamera = findViewById(R.id.btnAddByCamera);
         btnAddByGallery = findViewById(R.id.btnAddByGallery);
         isFabOpen = false;
+        groupNoPages = findViewById(R.id.groupNoPages);
 
         // get current document from the database and populate page list
         database = AppDatabase.getInstance(this);
@@ -103,6 +109,11 @@ public class DocumentActivity extends AppCompatActivity {
         document = database.docDao().getById(documentId);
         setTitle(document.getName());
         pageList = database.pageDao().getPagesInDocument(documentId);
+
+        // show hints, if pageList is empty
+        if (pageList.isEmpty()) {
+            groupNoPages.setVisibility(View.VISIBLE);
+        }
 
         // set layout of the RecyclerView
         pagesRecView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -240,14 +251,17 @@ public class DocumentActivity extends AppCompatActivity {
 
                 // check if delete button has been pressed
                 if (id == R.id.itemDelete) {
-                    // get the currently selected items and iterate over them
+                    // get the currently selected items
                     Selection<Long> selection = pagesSelectionTracker.getSelection();
+
+                    // arrange the keys in descending order to avoid conflicts with already deleted pages
                     ArrayList<Long> keysToDelete = new ArrayList<>();
                     for (Long key : selection) {
                         keysToDelete.add(key);
                     }
                     keysToDelete.sort(Collections.reverseOrder());
 
+                    // iterate over keys and delete corresponding pages
                     for (Long key : keysToDelete) {
                         int position = (int) (long) key;
 
@@ -271,6 +285,11 @@ public class DocumentActivity extends AppCompatActivity {
                         if (pagesAdapter != null) {
                             pagesAdapter.notifyItemRemoved(position);
                         }
+                    }
+
+                    // show hints, if pageList now is empty
+                    if (pageList.isEmpty()) {
+                        groupNoPages.setVisibility(View.VISIBLE);
                     }
 
                     // clear the selection and stop the actionMode
@@ -384,6 +403,11 @@ public class DocumentActivity extends AppCompatActivity {
                 // create a new page with the recorded image
                 Page page = Page.makeNew(documentId);
                 page.setImageUri(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
+
+                // dismiss hints, if pageList was empty
+                if (pageList.isEmpty()) {
+                    groupNoPages.setVisibility(View.GONE);
+                }
 
                 // insert the page to the pageList
                 pageList.add(page);

@@ -1,12 +1,16 @@
 <resources>
+
     <!-- General stuff -->
     <string name="app_name">Sylon</string>
     <string name="add">Add</string>
     <string name="update">Update</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="right_arrow">Right arrow</string>
 
     <!-- MainActivity -->
+    <string name="hint_no_documents">You have not created any documents yet.</string>
+    <string name="hint_create_document">Click here to create one</string>
     <string name="first_page">First page of the document</string>
     <string name="document_name">Document Name</string>
     <string name="enter_doc_name">Enter name of document</string>
@@ -18,10 +22,13 @@
     <string name="vertical_ellipsis">&#8942;</string>
 
     <!-- DocumentActivity -->
+    <string name="hint_no_pages">This document does not contain any pages.</string>
+    <string name="hint_create_page">Click here to create one</string>
     <string name="page_image">Image of the page</string>
     <string name="page_number">%d (ID %d)</string>
 
     <!-- CameraActivity -->
     <string name="permissions_denied">The app needs the permission to use the camera in order to take a picture.</string>
     <string name="snapshot">Take image</string>
+
 </resources>
