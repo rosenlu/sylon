@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * An activity showing the details of a document.
  * The activity shows the name of the document as well as all the pages inside.
  */
-public class DocumentActivity extends AppCompatActivity {
+public class PageListActivity extends AppCompatActivity {
 
     public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
@@ -89,7 +89,7 @@ public class DocumentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_document);
+        setContentView(R.layout.actvity_page_list);
 
         // get UI elements
         pagesRecView = findViewById(R.id.pagesRecView);
@@ -113,7 +113,7 @@ public class DocumentActivity extends AppCompatActivity {
 
         // set layout of the RecyclerView
         pagesRecView.setLayoutManager(new GridLayoutManager(this, 3));
-        adapter = new PagesRecViewAdapter(DocumentActivity.this, pageList);
+        adapter = new PagesRecViewAdapter(PageListActivity.this, pageList);
         pagesRecView.setAdapter(adapter);
 
         // set on click listeners for the FAB menu
@@ -229,7 +229,7 @@ public class DocumentActivity extends AppCompatActivity {
         return new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                MenuInflater menuInflater = new MenuInflater(DocumentActivity.this);
+                MenuInflater menuInflater = new MenuInflater(PageListActivity.this);
                 menuInflater.inflate(R.menu.options_menu_page, menu);
 
                 return true;

@@ -29,7 +29,7 @@ import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
 import net.luisr.sylon.fs.ImageRotationHandler;
-import net.luisr.sylon.ui.doc.DocumentActivity;
+import net.luisr.sylon.ui.doc.PageListActivity;
 
 import java.io.IOException;
 import java.util.List;
@@ -108,8 +108,8 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         // set an OnClickListener for the card as a whole
         holder.cardViewParent.setOnClickListener(v -> {
-            Intent intent = new Intent(context.getBaseContext(), DocumentActivity.class);
-            intent.putExtra(DocumentActivity.INTENT_EXTRA_DOCUMENT_ID, document.getId());
+            Intent intent = new Intent(context.getBaseContext(), PageListActivity.class);
+            intent.putExtra(PageListActivity.INTENT_EXTRA_DOCUMENT_ID, document.getId());
             context.startActivity(intent);
         });
     }

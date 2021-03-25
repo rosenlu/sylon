@@ -31,7 +31,7 @@ import java.util.List;
  *
  * Each item represents one instance of the Page class.
  * The UI contains a preview of the page and the page number.
- * @see DocumentActivity
+ * @see PageListActivity
  * @see Page
  */
 public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapter.ViewHolder> {

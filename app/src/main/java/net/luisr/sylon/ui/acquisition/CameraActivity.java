@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import net.luisr.sylon.R;
-import net.luisr.sylon.ui.doc.DocumentActivity;
+import net.luisr.sylon.ui.doc.PageListActivity;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -33,10 +33,10 @@ import java.util.concurrent.Executors;
 
 /**
  * Activity for taking photos. No cropping or other editing is done.
- * Typically launched from a {@link DocumentActivity}. If the activity finishes because a photo was
+ * Typically launched from a {@link PageListActivity}. If the activity finishes because a photo was
  * taken, the result is an {@link Intent} with code {@link android.app.Activity#RESULT_OK} and
  * the extra {@link CameraActivity#INTENT_EXTRA_IMAGE_URI} containing the photo URI.
- * @see DocumentActivity
+ * @see PageListActivity
  */
 public class CameraActivity extends AppCompatActivity {
     public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.image_uri";
