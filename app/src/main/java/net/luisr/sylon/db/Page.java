@@ -11,8 +11,7 @@ import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
 /**
- * Defines the structure of the pages table in the AppDatabase.
- * @see AppDatabase
+ * Defines the structure of the pages table in the {@link AppDatabase}.
  */
 @Entity(
         tableName = "pages",

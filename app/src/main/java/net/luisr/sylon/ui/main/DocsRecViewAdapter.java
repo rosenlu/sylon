@@ -35,13 +35,13 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * The RecyclerView.Adapter for the docsRecView of the MainActivity.
+ * The {@link RecyclerView.Adapter} for the {@link DocsRecViewAdapter} of the {@link DocumentListFragment}.
  *
- * Each item represents one instance of the Document class.
+ * Each item represents one instance of the {@link Document} class.
  * The UI contains a preview of the first page, the name of the Document and a button for more
  * options. These options are changing the name of or deleting the Document instance in the database.
  * @see MainActivity
- * @see Document
+ * @see DocumentListFragment
  */
 public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.ViewHolder> {
     /** The tag used for logging */
@@ -50,14 +50,14 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     /** The activity from which the adapter was created. */
     private final Activity context;
 
-    /** A list containing all the documents to be shown in the RecyclerView. */
+    /** A list containing all the documents to be shown in the {@link RecyclerView}. */
     private final List<Document> docList;
 
     /** The app's database. */
     private AppDatabase database;
 
     /**
-     * Constructor for the DocsRecViewAdapter.
+     * Constructor for the {@link DocsRecViewAdapter}.
      * @param context the activity from which the adapter was created.
      * @param docList a list containing all the documents to be shown in the RecyclerView.
      */
@@ -231,7 +231,8 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
     }
 
     /**
-     * Callback function for when the confirms the warning dialog created by deleteBtnCallback.
+     * Callback function for when the user confirms the warning dialog created by
+     * {@link #itemDeleteCallback(Document, int)}.
      * @param document the document at the current position.
      * @param position the current position of the ViewHolder.
      */
@@ -261,7 +262,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         }
     }
 
-    /** The ViewHolder class extracts the UI elements from the layout. */
+    /** The {@link ViewHolder} class extracts the UI elements from the layout. */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtDocName;
         MaterialCardView cardViewParent;

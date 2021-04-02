@@ -8,8 +8,7 @@ import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
 /**
- * Defines the structure of the documents table in the AppDatabase.
- * @see AppDatabase
+ * Defines the structure of the documents table in the {@link AppDatabase}.
  */
 @Entity(tableName = "documents")
 public class Document implements Serializable {

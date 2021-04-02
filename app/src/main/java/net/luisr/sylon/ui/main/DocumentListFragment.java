@@ -25,31 +25,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A fragment showing a list of all documents in the database.
- * This fragment is the default fragment of the MainActivity. Via a button, the user can add a
- * document to the database. All documents that are available are listed in a RecyclerView.
+ * A {@link Fragment} showing a list of all {@link Document}s in the {@link AppDatabase}.
+ * This fragment is the default fragment of the {@link MainActivity}. Via a button, the user can add a
+ * Document to the database. All Documents that are available are listed in a {@link RecyclerView}.
  */
 public class DocumentListFragment extends Fragment {
 
     /** The app's database containing all documents and pages. */
     private AppDatabase database;
 
-    /** A list containing all documents. The list is passed to the docsRecView. */
+    /** A list containing all documents. The list is passed to the {@link #docsRecView}. */
     private List<Document> docList = new ArrayList<>();
 
-    /** A RecyclerView showing all the documents in the docList. */
+    /** A {@link RecyclerView} showing all the documents in the {@link #docList}. */
     private RecyclerView docsRecView;
 
-    /** The RecyclerView.Adapter for the docsRecView. */
+    /** The {@link RecyclerView.Adapter} for the {@link #docsRecView}. */
     private DocsRecViewAdapter adapter;
 
-    /** A button to create a new document */
+    /** A button to create a new {@link Document} */
     private FloatingActionButton btnAdd;
 
-    /** A group with all text and image views containing hints when no document is found. */
+    /** A group with all text and image views containing hints when no {@link Document} is found. */
     private Group groupNoDocuments;
 
-    /** Constructor, defining the layout file of the Fragment. */
+    /** Constructor, defining the layout file of the {@link Fragment}. */
     public DocumentListFragment() {
         super(R.layout.fragment_document_list);
     }
@@ -82,11 +82,11 @@ public class DocumentListFragment extends Fragment {
     }
 
     /**
-     * Callback function for the btnAdd OnClickListener.
+     * Callback function for the {@link #btnAdd} {@link android.view.View.OnClickListener}.
      *
-     * Creates a dialog in which the user has to enter the name of the document.
+     * Creates a {@link Dialog} in which the user has to enter the name of the document.
      * After pressing a confirm button, the document is added to the database and shown in the
-     * docsRecView.
+     * {@link #docsRecView}.
      */
     private void btnAddCallback() {
         // open dialog to enter document name
@@ -114,10 +114,10 @@ public class DocumentListFragment extends Fragment {
     }
 
     /**
-     * Callback function for the btnConfirm OnClickListener.
+     * Callback function for the confirm button of the {@link #btnAddCallback()}.
      *
-     * Creates a new Document with the name passed by the user and saves it into the database as
-     * well as the docList.
+     * Creates a new {@link Document} with the name passed by the user and saves it into the
+     * {@link #database} as well as the {@link #docList}.
      * @param name the name of the Document.
      */
     private void btnConfirmCallback(String name) {
@@ -144,7 +144,7 @@ public class DocumentListFragment extends Fragment {
     }
 
     /**
-     * Getter for the groupNoDocuments group.
+     * Getter for the groupNoDocuments {@link Group}.
      * @return the groupNoDocuments
      */
     public Group getGroupNoDocuments() {

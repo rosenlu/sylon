@@ -7,6 +7,8 @@ import android.graphics.Matrix;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 
+import net.luisr.sylon.db.Document;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,7 +28,7 @@ public class ImageRotationHandler {
      *
      * @param context       The current context
      * @param selectedImage The Image URI
-     * @return Bitmap image results
+     * @return {@link Bitmap} image results
      * @throws IOException if URI does not exist
      */
     public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
@@ -107,7 +109,7 @@ public class ImageRotationHandler {
      *
      * @param img           The image bitmap
      * @param selectedImage Image URI
-     * @return The resulted Bitmap after manipulation
+     * @return The resulted {@link Bitmap} after manipulation
      */
     private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
 

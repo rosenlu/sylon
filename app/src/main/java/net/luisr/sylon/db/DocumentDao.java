@@ -10,15 +10,14 @@ import java.util.List;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 /**
- * The Data Access Object (DAO) for the Document class.
- * @see Document
+ * The Data Access Object ({@link Dao}) for the {@link Document} class.
  * @see AppDatabase
  */
 @Dao
 public interface DocumentDao {
 
     /**
-     * Insert a Document entity to the database.
+     * Insert a {@link Document}  entity to the database.
      * @param document the Document to insert.
      * @return the ID of the newly added Document.
      */
@@ -26,21 +25,21 @@ public interface DocumentDao {
     long insert(Document document);
 
     /**
-     * Delete a Document entity in the database.
+     * Delete a {@link Document}  entity in the database.
      * @param document the Document to delete.
      */
     @Delete
     void delete(Document document);
 
     /**
-     * Get all Documents in the documents table.
+     * Get all {@link Document} entities in the documents table.
      * @return a List of all Documents.
      */
     @Query("SELECT * FROM documents")
     List<Document> getAll();
 
     /**
-     * Get a Document entity by its ID.
+     * Get a {@link Document} entity by its ID.
      * @param id the ID of the Document.
      * @return the Document.
      */
@@ -48,7 +47,7 @@ public interface DocumentDao {
     Document getById(int id);
 
     /**
-     * Update the name of a Document in the database.
+     * Update the name of a {@link Document} in the database.
      * @param id the ID of the Document.
      * @param name the new name of the Document.
      */

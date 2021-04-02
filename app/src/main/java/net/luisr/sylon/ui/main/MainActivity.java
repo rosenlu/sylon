@@ -12,9 +12,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import net.luisr.sylon.R;
 
 /**
- * The Main Activity of the app.
- * This activity is the launcher activity and shows a list of all documents in the database.
- * Via a button, the user can add a document to the database.
+ * The Main {@link android.app.Activity} of the app.
+ * This activity is the launcher activity and shows a list of all {@link net.luisr.sylon.db.Document}s
+ * in the {@link net.luisr.sylon.db.AppDatabase}.
+ * Via a button, the user can add a Document to the AppDatabase.
  */
 public class MainActivity extends AppCompatActivity {
 

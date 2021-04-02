@@ -27,28 +27,28 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * The RecyclerView.Adapter for the pagesRecView of the DocumentActivity.
+ * The {@link RecyclerView.Adapter} for the {@link PagesRecViewAdapter} of the
+ * {@link PageListActivity}.
  *
- * Each item represents one instance of the Page class.
+ * Each item represents one instance of the {@link Page} class.
  * The UI contains a preview of the page and the page number.
  * @see PageListActivity
- * @see Page
  */
 public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapter.ViewHolder> {
 
     /** The activity from which the adapter was created. */
     private Activity context;
 
-    /** A list containing all the pages to be shown in the RecyclerView. */
+    /** A list containing all the pages to be shown in the {@link RecyclerView}. */
     private final List<Page> pageList;
 
-    /** A SelectionTracker tracking the selection of one or multiple pages. */
+    /** A {@link SelectionTracker} tracking the selection of one or multiple pages. */
     private SelectionTracker<Long> selectionTracker;
 
     /**
-     * Constructor for the PagesRecViewAdapter.
+     * Constructor for the {@link PagesRecViewAdapter}.
      * @param context the activity from which the adapter was created.
-     * @param pageList a list containing all the pages to be shown in the RecyclerView.
+     * @param pageList a list containing all the pages to be shown in the {@link RecyclerView}.
      */
     public PagesRecViewAdapter(Activity context, List<Page> pageList) {
         this.pageList = pageList;
@@ -57,7 +57,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
     }
 
     /**
-     * Setter for the selection tracker.
+     * Setter for the {@link SelectionTracker}.
      * @param selectionTracker the selection tracker.
      */
     public void setSelectionTracker(SelectionTracker<Long> selectionTracker) {
@@ -86,7 +86,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         return pageList.size();
     }
 
-    /** The ViewHolder class extracts the UI elements from the layout and fills them with content. */
+    /** The {@link ViewHolder} class extracts the UI elements from the layout and fills them with content. */
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private final Details details;
@@ -98,7 +98,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
 
         /**
          * Constructor for the view holder. Gets all the UI elements from the layout.
-         * @param itemView an item view.
+         * @param itemView an item {@link View}.
          */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -110,7 +110,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         }
 
         /**
-         * Bind a page to its position. Show the page number and the preview image to the user.
+         * Bind a {@link Page} to its position. Show the page number and the preview image to the user.
          * @param page the page.
          * @param position the position of the page.
          */
@@ -146,7 +146,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         }
 
         /**
-         * Getter for the item details.
+         * Getter for the {@link ItemDetailsLookup.ItemDetails}.
          * @return the item details.
          */
         ItemDetailsLookup.ItemDetails<Long> getItemDetails() {
@@ -156,7 +156,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
     }
 
     /**
-     * The KeyProvider class maps the keys in the selection to the position in the pageList.
+     * The {@link KeyProvider} class maps the keys in the selection to the position in the {@link #pageList}.
      * The key and position are identical.
      */
     public static class KeyProvider extends ItemKeyProvider<Long> {
@@ -177,7 +177,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         }
     }
 
-    /** The DetailsLookup class gets the details of the item that was selected by the user. */
+    /** The {@link DetailsLookup} class gets the details of the item that was selected by the user. */
     public static class DetailsLookup extends ItemDetailsLookup<Long> {
 
         private final RecyclerView recyclerView;
@@ -201,7 +201,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         }
     }
 
-    /** The Details class defines the details of a selected item. */
+    /** The {@link Details} class defines the details of a selected item. */
     private static class Details extends ItemDetailsLookup.ItemDetails<Long> {
 
         long position;

@@ -11,15 +11,14 @@ import java.util.List;
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 /**
- * The Data Access Object (DAO) for the Page class.
- * @see Page
+ * The Data Access Object ({@link Dao}) for the {@link Page} class.
  * @see AppDatabase
  */
 @Dao
 public interface PageDao {
 
     /**
-     * Insert one or more Page entities into the database.
+     * Insert one or more {@link Page} entities into the database.
      * @param pages the Page(s) to insert.
      * @return the ID of the newly added Page.
      */
@@ -27,21 +26,21 @@ public interface PageDao {
     long[] insert(Page... pages);
 
     /**
-     * Delete one or more Page entities from the database.
+     * Delete one or more {@link Page} entities from the database.
      * @param pages the Page(s) to delete.
      */
     @Delete
     void delete(Page... pages);
 
     /**
-     * Update one or more Page entities in the database.
+     * Update one or more {@link Page} entities in the database.
      * @param pages the Page(s) to update.
      */
     @Update
     void update(Page... pages);
 
     /**
-     * Get the number of Pages inside a Document.
+     * Get the number of {@link Page} entities inside a {@link Document}.
      * @param documentId the ID of the Document.
      * @return the number of Pages in the Document.
      */
@@ -49,7 +48,7 @@ public interface PageDao {
     int getNumberOfPagesInDocument(int documentId);
 
     /**
-     * Get all Pages in a Document.
+     * Get all {@link Page} entities in a {@link Document}.
      * @param documentId the ID of the Document.
      * @return a list of Pages in the Document.
      */
@@ -57,7 +56,7 @@ public interface PageDao {
     List<Page> getPagesInDocument(int documentId);
 
     /**
-     * Get the first Page in a Document.
+     * Get the first {@link Page} in a {@link Document}.
      * @param documentId the ID of the Document.
      * @return the first Page in the Document.
      */

@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * An activity showing the details of a document.
- * The activity shows the name of the document as well as all the pages inside.
+ * An activity showing the details of a {@link Document}.
+ * The activity shows the name of the Document as well as all the pages inside.
  */
 public class PageListActivity extends AppCompatActivity {
 
@@ -53,7 +53,7 @@ public class PageListActivity extends AppCompatActivity {
     /** The app's database containing all documents and pages. */
     private AppDatabase database;
 
-    /** A list containing all pages. The list is passed to the pagesRecView. */
+    /** A list containing all pages. The list is passed to the {@link PagesRecViewAdapter}. */
     private List<Page> pageList = new ArrayList<>();
 
     /** A list keeping track of all pages the user has deleted while the activity was running. */
@@ -65,25 +65,25 @@ public class PageListActivity extends AppCompatActivity {
     /** The document for which the activity was started. */
     private Document document;
 
-    /** A RecyclerView showing all the pages in the pageList. */
+    /** A {@link RecyclerView} showing all the pages in the pageList. */
     private RecyclerView pagesRecView;
 
-    /** The RecyclerView.Adapter for the pagesRecView. */
+    /** The {@link RecyclerView.Adapter} for the {@link PagesRecViewAdapter}. */
     private PagesRecViewAdapter adapter;
 
-    /** The SelectionTracker keeping track of selected pages. */
+    /** The {@link SelectionTracker} keeping track of selected pages. */
     SelectionTracker<Long> pagesSelectionTracker;
 
-    /** The ActionMode that is activated when one or multiple pages are selected. */
+    /** The {@link ActionMode} that is activated when one or multiple pages are selected. */
     private ActionMode actionMode;
 
-    /** The FloatingActionButtons (FABs) for the FAB menu */
+    /** The {@link FloatingActionButton}s (FABs) for the FAB menu */
     private FloatingActionButton btnAdd, btnAddByCamera, btnAddByGallery;
 
     /** Contains the opening state of the FAB menu. */
     private boolean isFabOpen;
 
-    /** A group with all text and image views containing hints when no page is found. */
+    /** A {@link Group} with all text and image views containing hints when no {@link Page} is found. */
     private Group groupNoPages;
 
     @Override
@@ -127,7 +127,7 @@ public class PageListActivity extends AppCompatActivity {
         createAndAttachSelectionTracker();
     }
 
-    /** Set on click listeners for the FAB menu. */
+    /** Set on {@link android.view.View.OnClickListener}s for the FAB menu. */
     private void setFabMenuOnClickListeners() {
         // toggle the FAB menu when btnAdd is clicked
         btnAdd.setOnClickListener(v -> {
@@ -184,7 +184,10 @@ public class PageListActivity extends AppCompatActivity {
         btnAddByGallery.animate().alpha(0);
     }
 
-    /** Create the selection tracker, attach it to the adapter and add a selection observer. */
+    /**
+     * Create the {@link SelectionTracker}, attach it to the {@link PagesRecViewAdapter} and add a
+     * {@link androidx.recyclerview.selection.SelectionTracker.SelectionObserver}.
+     */
     private void createAndAttachSelectionTracker() {
         pagesSelectionTracker = new SelectionTracker.Builder<>(
                 PAGES_SELECTION_ID,
@@ -199,7 +202,8 @@ public class PageListActivity extends AppCompatActivity {
     }
 
     /**
-     * Get the selection observer for the selection tracker.
+     * Get the {@link androidx.recyclerview.selection.SelectionTracker.SelectionObserver} for the
+     * {@link SelectionTracker}.
      * @return the selection observer.
      */
     private SelectionTracker.SelectionObserver<Long> getSelectionObserver() {
@@ -222,7 +226,8 @@ public class PageListActivity extends AppCompatActivity {
     }
 
     /**
-     * Get the the callback object for the pagesTouchHelper that enables selecting one or multiple pages.
+     * Get the the {@link ActionMode.Callback} object for the pagesTouchHelper that enables selecting
+     * one or multiple pages.
      * @return the callback object
      */
     private ActionMode.Callback getActionModeCallback() {
@@ -305,7 +310,8 @@ public class PageListActivity extends AppCompatActivity {
     }
 
     /**
-     * Get the the callback object for the pagesTouchHelper that enables reordering of pages.
+     * Get the the {@link ItemTouchHelper.Callback} object for the pagesTouchHelper that enables
+     * reordering of pages.
      * @return the callback object
      */
     private ItemTouchHelper.Callback getPagesTouchCallback() {
@@ -368,7 +374,7 @@ public class PageListActivity extends AppCompatActivity {
     }
 
     /**
-     * Move a page withing the pageList.
+     * Move a {@link Page} withing the {@link #pageList}.
      * @param from the position at which the page used to be
      * @param to the new position of the page
      */
