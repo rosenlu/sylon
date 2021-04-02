@@ -1,6 +1,8 @@
 package net.luisr.sylon.ui.main;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -12,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,9 +23,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
+import net.luisr.sylon.ui.acquisition.CameraFragment;
+import net.luisr.sylon.ui.doc.PageListActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A {@link Fragment} showing a list of all {@link Document}s in the {@link AppDatabase}.
@@ -79,6 +86,9 @@ public class DocumentListFragment extends Fragment {
 
         // set OnClickListener for btnAdd
         btnAdd.setOnClickListener(v -> btnAddCallback());
+
+        // listen for a result from one of the other fragments of the MainActivity
+        listenForFragmentResult();
     }
 
     /**
@@ -123,24 +133,87 @@ public class DocumentListFragment extends Fragment {
     private void btnConfirmCallback(String name) {
         // name should not be empty
         if (!name.equals("")) {
-            // instantiate Document
-            Document doc = new Document(name);
-
-            // insert doc to database
-            doc.setId((int) database.docDao().insert(doc));
-
-            // dismiss hints, if docList was empty
-            if (docList.isEmpty()) {
-                groupNoDocuments.setVisibility(View.GONE);
-            }
-
-            // insert doc to docList and notify DocsRecViewAdapter
-            docList.add(doc);
-            adapter.notifyDataSetChanged();
+            addDocumentAndStartPageListActivity(name, null);
         } else {
             // show message that the doc name cannot be empty
             Toast.makeText(requireView().getContext(), getString(R.string.empty_doc_name_msg), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Listen for a Result on the parent {@link FragmentManager}. This result can either come from
+     * the {@link CameraFragment} or from the (not yet existing) GalleryFragment.
+     * TODO: Add link to GalleryFragment
+     */
+    private void listenForFragmentResult() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        fragmentManager.setFragmentResultListener(CameraFragment.REQUEST_KEY_CAMERA_FRAGMENT, this, (requestKey, result) -> {
+            // get uri from the bundle
+            String savedUri = result.getString(CameraFragment.BUNDLE_KEY_IMAGE_URI);
+
+            if (savedUri.isEmpty()) {  // something went wrong (usually camera permissions denied)
+                // show Toast message and set result to canceled
+                Toast.makeText(requireContext(), R.string.permissions_denied, Toast.LENGTH_SHORT).show();
+            } else {  // everything is fine
+                // hide the camera fragment
+                fragmentManager.beginTransaction().hide(fragmentManager.findFragmentByTag(MainActivity.CAMERA_FRAGMENT_ID));
+
+                // get document name and add it to the database
+                String documentName = getDocumentName();
+                requireActivity().runOnUiThread(() -> addDocumentAndStartPageListActivity(documentName, savedUri));
+            }
+        });
+
+        // TODO: setFragmentResultListener for the GalleryFragment
+    }
+
+    /**
+     * Get a unique name for a newly create {@link Document}.
+     * @return the unique Document name
+     */
+    private String getDocumentName() {
+        String datetimeFormat = "yyyy-MM-dd";
+
+        String baseDocName = new SimpleDateFormat(datetimeFormat, Locale.US).format(System.currentTimeMillis()) + " New Document";
+        String finalDocName = baseDocName;
+        List<Document> docsWithSameName = database.docDao().getAllByName(finalDocName);
+        int i = 1;
+        while (docsWithSameName.size() > 0) {
+            finalDocName = baseDocName + " (" + i++ + ")";
+            docsWithSameName = database.docDao().getAllByName(finalDocName);
+        }
+
+        return finalDocName;
+    }
+
+    /**
+     * Add a new {@link Document} to both the {@link #database} and the {@link #docList}. After the
+     * Document is created, the {@link PageListActivity} is started.
+     * @param name the name of the new Document.
+     * @param firstPageImgUri the image URI of the first page, can be null.
+     */
+    private void addDocumentAndStartPageListActivity(@NonNull String name, String firstPageImgUri) {
+        // instantiate Document
+        Document doc = new Document(name);
+
+        // insert doc to database
+        int docId = (int) database.docDao().insert(doc);
+        doc.setId(docId);
+
+        // dismiss hints, if docList was empty
+        if (docList.isEmpty()) {
+            groupNoDocuments.setVisibility(View.GONE);
+        }
+
+        // insert doc to docList and notify DocsRecViewAdapter
+        docList.add(doc);
+        adapter.notifyDataSetChanged();
+
+        Context context = requireContext();
+        Intent intent = new Intent(context, PageListActivity.class);
+        intent.putExtra(PageListActivity.INTENT_EXTRA_DOCUMENT_ID, docId);
+        intent.putExtra(PageListActivity.INTENT_EXTRA_FIRST_PAGE_IMG_URI, firstPageImgUri);
+        context.startActivity(intent);
     }
 
     /**

@@ -6,10 +6,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import net.luisr.sylon.R;
+import net.luisr.sylon.ui.acquisition.CameraFragment;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Main {@link android.app.Activity} of the app.
@@ -20,12 +25,13 @@ import net.luisr.sylon.R;
 public class MainActivity extends AppCompatActivity {
 
     public static String DOCUMENT_LIST_FRAGMENT_ID = "net.luisr.sylon.document_list_fragment_id";
+    public static String CAMERA_FRAGMENT_ID = "net.luisr.sylon.camera_fragment_id";
 
     /** The bottom navigation bar of the layout. */
     private BottomNavigationView bottomNavigationView;
 
-    /** The fragment transaction used to replace the current fragment with another one. */
-    private FragmentTransaction fragmentTransaction;
+    /** The {@link FragmentManager} managing the fragment of the fragment_container_view. */
+    private FragmentManager fragmentManager;
 
     public MainActivity() {
         super(R.layout.activity_main);
@@ -40,11 +46,47 @@ public class MainActivity extends AppCompatActivity {
 
         // start fragment transaction with default fragment (DocumentListFragment)
         if (savedInstanceState == null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.setReorderingAllowed(true);
-            fragmentTransaction.replace(R.id.fragment_container_view, DocumentListFragment.class, null, DOCUMENT_LIST_FRAGMENT_ID);
-            fragmentTransaction.commit();
+            fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container_view, DocumentListFragment.class, null, DOCUMENT_LIST_FRAGMENT_ID).commit();
+        }
+
+        // listen for clicks on the bottomNavigationView
+        bottomNavigationView.setOnNavigationItemSelectedListener(this::onNavigationItemSelectedCallback);
+    }
+
+    /**
+     * The Callback function when a navigation item is selected in the {@link #bottomNavigationView}.
+     * Starts a new {@link FragmentTransaction} to replace the fragment in the fragment container
+     * accordingly.
+     * @param item the {@link MenuItem} that was clicked.
+     * @return boolean, weather the click was handled correctly.
+     */
+    private boolean onNavigationItemSelectedCallback(MenuItem item) {
+        // get the id of the selected item
+        int itemId = item.getItemId();
+
+        // check which item was clicked and replace the fragment accordingly
+        if (itemId == R.id.itemDocuments) {
+            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CAMERA_FRAGMENT_ID);
+            if (cameraFragment != null) {
+                fragmentManager.beginTransaction().hide(cameraFragment).commit();
+            }
+            return true;
+        } else if (itemId == R.id.itemCamera) {
+            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CAMERA_FRAGMENT_ID);
+            if (cameraFragment != null) {
+                fragmentManager.beginTransaction().show(cameraFragment).commit();
+            } else {
+                fragmentManager.beginTransaction().add(R.id.fragment_container_view, CameraFragment.class, null, CAMERA_FRAGMENT_ID).commit();
+            }
+            return true;
+        } else if (itemId == R.id.itemGallery) {
+            // TODO: implement GalleryFragment
+            Toast.makeText(this, "Not implemented", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            return false;
         }
     }
 }

@@ -39,6 +39,14 @@ public interface DocumentDao {
     List<Document> getAll();
 
     /**
+     * Get all {@link Document} entities with the specified name.
+     * @param name the name to look for
+     * @return a List of all Documents.
+     */
+    @Query("SELECT * FROM documents WHERE name = :name")
+    List<Document> getAllByName(String name);
+
+    /**
      * Get a {@link Document} entity by its ID.
      * @param id the ID of the Document.
      * @return the Document.

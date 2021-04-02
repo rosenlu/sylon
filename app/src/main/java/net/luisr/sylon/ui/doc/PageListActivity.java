@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 public class PageListActivity extends AppCompatActivity {
 
     public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
+    public static final String INTENT_EXTRA_FIRST_PAGE_IMG_URI = "net.luisr.sylon.first_page_img_uri";
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
     private static final int CAMERA_REQUEST_CODE = 1;
 
@@ -115,6 +116,12 @@ public class PageListActivity extends AppCompatActivity {
         pagesRecView.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new PagesRecViewAdapter(PageListActivity.this, pageList);
         pagesRecView.setAdapter(adapter);
+
+        // see if a first page image uri was passed and create first page
+        String firstPageImageUri = getIntent().getStringExtra(INTENT_EXTRA_FIRST_PAGE_IMG_URI);
+        if (firstPageImageUri != null) {
+            addPage(firstPageImageUri);
+        }
 
         // set on click listeners for the FAB menu
         setFabMenuOnClickListeners();
@@ -395,6 +402,26 @@ public class PageListActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Add a page to the {@link #database} as well as the {@link #pageList}.
+     * @param imageUri the URI of the image of the first page.
+     */
+    private void addPage(String imageUri) {
+        // create a new page with the recorded image
+        Page page = Page.makeNew(documentId);
+        page.setImageUri(imageUri);
+
+        // dismiss hints, if pageList was empty
+        if (pageList.isEmpty()) {
+            groupNoPages.setVisibility(View.GONE);
+        }
+
+        // insert the page to the pageList
+        pageList.add(page);
+        page.setPageNumber(pageList.indexOf(page));
+        adapter.notifyDataSetChanged();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -402,19 +429,7 @@ public class PageListActivity extends AppCompatActivity {
         // check if the result came from the CameraActivity
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                // create a new page with the recorded image
-                Page page = Page.makeNew(documentId);
-                page.setImageUri(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
-
-                // dismiss hints, if pageList was empty
-                if (pageList.isEmpty()) {
-                    groupNoPages.setVisibility(View.GONE);
-                }
-
-                // insert the page to the pageList
-                pageList.add(page);
-                page.setPageNumber(pageList.indexOf(page));
-                adapter.notifyDataSetChanged();
+                addPage(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
             }
         }
     }
