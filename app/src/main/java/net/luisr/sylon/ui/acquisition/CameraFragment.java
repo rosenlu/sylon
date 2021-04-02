@@ -1,15 +1,18 @@
 package net.luisr.sylon.ui.acquisition;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContextWrapper;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.core.Camera;
@@ -33,16 +36,20 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * A {@link Fragment} for taking pictures using the camera of the smartphone.
+ * It is responsible for checking the required permissions, showing a camera preview and finally
+ * taking a picture when the user presses the capture button. The URI of the saved image is the
+ * passed to the parent {@link androidx.fragment.app.FragmentManager}.
+ */
 public class CameraFragment extends Fragment {
 
-    /** Permissions request code for camera access */
-    private static final int REQUEST_CODE_CAMERA = 10;
+    public static final String REQUEST_KEY_CAMERA_FRAGMENT = "net.luisr.sylon.request_camera_fragment";
+    public static final String BUNDLE_KEY_IMAGE_URI = "net.luisr.sylon.bundle_image_uri";
 
-    /** The parent activity */
-    Activity parentActivity;
 
-    /** The layout view of the fragment */
-    View view;
+    /** A launcher to request permissions for the camera */
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     /** Format of photo file names */
     private final String FILENAME_FORMAT = "yyyy-MM-dd_HHmmss-SSS";
@@ -64,19 +71,20 @@ public class CameraFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        parentActivity = (Activity) view.getContext();
-        this.view = view;
-
         // set up capture
         imageCapture = new ImageCapture.Builder()
-                .setTargetRotation(parentActivity.getWindowManager().getDefaultDisplay().getRotation())
+                .setTargetRotation(requireActivity().getWindowManager().getDefaultDisplay().getRotation())
                 .build();
+
+        requestPermissionLauncher = getRequestPermissionLauncher();
 
         // check for permission and request if necessary
         if (allPermissionsGranted()) {
             startCamera();
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+            showRequestPermissionRationaleCamera();
         } else {
-            requestPermissions(new String[] { Manifest.permission.CAMERA }, REQUEST_CODE_CAMERA);
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
 
         // bind snapshot button
@@ -94,14 +102,63 @@ public class CameraFragment extends Fragment {
     }
 
     /**
+     * Returns an {@link ActivityResultLauncher} with a
+     * {@link androidx.activity.result.contract.ActivityResultContracts.RequestPermission} object
+     * as its {@link androidx.activity.result.contract.ActivityResultContract}. If the user grants
+     * permission after the launcher has been launched, the camera is started. If not, an empty
+     * result is passed to the parent fragment manager.
+     * @return the {@link ActivityResultLauncher}
+     */
+    private ActivityResultLauncher<String> getRequestPermissionLauncher() {
+        return registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        // Start preview on the UI
+                        startCamera();
+                    } else {
+                        // send an empty result to the host activity
+                        Bundle data = new Bundle();
+                        data.putString(BUNDLE_KEY_IMAGE_URI, "");
+                        getParentFragmentManager().setFragmentResult(REQUEST_KEY_CAMERA_FRAGMENT, data);
+                    }
+                });
+    }
+
+    /**
+     * Give the user a rationale for the camera permission in case he already denied the permission
+     * once. Starts a {@link Dialog} in which the user can click accept or cancel.
+     */
+    private void showRequestPermissionRationaleCamera() {
+        // open dialog
+        Dialog dialog = new Dialog(requireView().getContext());
+        dialog.setContentView(R.layout.dialog_request_permission_rationale_camera);
+        int w = WindowManager.LayoutParams.MATCH_PARENT;
+        int h = WindowManager.LayoutParams.WRAP_CONTENT;
+        dialog.getWindow().setLayout(w, h);
+        dialog.show();
+
+        // get UI elements of dialog
+        Button btnAccept = dialog.findViewById(R.id.btnAccept);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        // set listeners for the buttons
+        btnAccept.setOnClickListener(v -> {
+            dialog.dismiss();
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+    }
+
+    /**
      * Retrieve either the first external media directory from
      * {@link ContextWrapper#getExternalMediaDirs()} if it is valid or the "files directory" from
      * {@link ContextWrapper#getFilesDir()}.
      * @return the resolved output directory
      */
     private File getOutputDirectory() {
-        File[] externalMediaDirs = parentActivity.getExternalMediaDirs();
-        File filesDir = parentActivity.getFilesDir();
+        File[] externalMediaDirs = requireView().getContext().getExternalMediaDirs();
+        File filesDir = requireView().getContext().getFilesDir();
         if (externalMediaDirs.length != 0) {
             File firstExtDir = externalMediaDirs[0];
             if (firstExtDir != null && firstExtDir.exists()) {
@@ -114,25 +171,9 @@ public class CameraFragment extends Fragment {
         return filesDir;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_CODE_CAMERA) {
-            if (allPermissionsGranted()) {
-                // Start preview on the UI
-                startCamera();
-            } else {
-                // User just declined permission(s)
-                Toast.makeText(parentActivity, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     /**
-     * Take a photo, saving it to {@link CameraFragment#imgDirectory}. If successful, finish the
-     * {@link CameraActivity} with the extra {@link CameraActivity#INTENT_EXTRA_IMAGE_URI} set and
-     * {@link android.app.Activity#RESULT_OK} as the result value.
+     * Take a photo, saving it to {@link #imgDirectory}. If successful, set the image URI as a
+     * Fragment Result using the {@link #BUNDLE_KEY_IMAGE_URI}. The result is then processed
      */
     private void takePhoto() {
         // Format the time and create a File within the image dir
@@ -148,16 +189,14 @@ public class CameraFragment extends Fragment {
                 String msg = "Image " + savedUri + " saved successfully!";
                 System.out.println(msg);
 
-                Intent intent = new Intent();
-                intent.putExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI, savedUri);
-                parentActivity.setResult(Activity.RESULT_OK, intent);
-                // End activity
-                parentActivity.finish();
+                Bundle data = new Bundle();
+                data.putString(BUNDLE_KEY_IMAGE_URI, savedUri);
+
+                getParentFragmentManager().setFragmentResult(REQUEST_KEY_CAMERA_FRAGMENT, data);
             }
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-//                Toast.makeText(MainActivity.this, "Image " + outputFile.toString() + " could not be saved", Toast.LENGTH_SHORT).show();
                 System.out.println("Image could not be saved: " + exception.getMessage());
             }
         });
@@ -167,7 +206,7 @@ public class CameraFragment extends Fragment {
      * Starts the preview inside the layout's {@link PreviewView}.
      */
     private void startCamera() {
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(parentActivity);
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(requireView().getContext());
 
         cameraProviderFuture.addListener(() -> {
 
@@ -180,7 +219,7 @@ public class CameraFragment extends Fragment {
                 CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
 
                 // get our view
-                PreviewView previewView = view.findViewById(R.id.viewFinder);
+                PreviewView previewView = requireView().findViewById(R.id.viewFinder);
                 // set the surface provider to the UI's surface provider
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
@@ -191,7 +230,7 @@ public class CameraFragment extends Fragment {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, ContextCompat.getMainExecutor(parentActivity));
+        }, ContextCompat.getMainExecutor(requireView().getContext()));
     }
 
     /**
@@ -199,7 +238,7 @@ public class CameraFragment extends Fragment {
      * @return true if the user previously granted all permissions
      */
     private boolean allPermissionsGranted() {
-        return parentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return requireView().getContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
