@@ -221,9 +221,8 @@ public class PageListActivity extends AppCompatActivity {
                 if (pagesSelectionTracker.getSelection().size() > 0) {
                     if (actionMode == null) {
                         actionMode = startSupportActionMode(getActionModeCallback());
-                        if (actionMode != null) {
-                            actionMode.setTitle(String.valueOf(pagesSelectionTracker.getSelection().size()));
-                        }
+                    } else {
+                        actionMode.setTitle(getResources().getString(R.string.selection_title, pagesSelectionTracker.getSelection().size()));
                     }
                 } else if (actionMode != null) {
                     actionMode.finish();
@@ -349,12 +348,13 @@ public class PageListActivity extends AppCompatActivity {
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 // the localFromPosition changes every time the item is dragged (even when it was not dropped in between)
                 int localFromPosition = viewHolder.getAdapterPosition();
-                toPosition = target.getAdapterPosition();
+                int localToPosition = target.getAdapterPosition();
 
                 // move the item
                 PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
                 if (pagesAdapter != null) {
-                    pagesAdapter.notifyItemMoved(localFromPosition, toPosition);
+                    movePage(localFromPosition, localToPosition);
+                    pagesAdapter.notifyItemMoved(localFromPosition, localToPosition);
                 }
 
                 // clear the selection
@@ -372,10 +372,7 @@ public class PageListActivity extends AppCompatActivity {
                 super.clearView(recyclerView, viewHolder);
 
                 // executed once the item was actually dropped
-                // only move the page if it really changes positions
-                if (fromPosition != -1 && toPosition != -1 && fromPosition != toPosition) {
-                    movePage(fromPosition, toPosition);
-                }
+                adapter.notifyItemChanged(viewHolder.getAdapterPosition());
             }
         };
     }
@@ -399,7 +396,6 @@ public class PageListActivity extends AppCompatActivity {
                 pageList.get(i).setModified(true);
             }
         }
-        adapter.notifyDataSetChanged();
     }
 
     /**
