@@ -156,7 +156,7 @@ public class DocumentListFragment extends Fragment {
                 Toast.makeText(requireContext(), R.string.permissions_denied, Toast.LENGTH_SHORT).show();
             } else {  // everything is fine
                 // hide the camera fragment
-                fragmentManager.beginTransaction().hide(fragmentManager.findFragmentByTag(MainActivity.CAMERA_FRAGMENT_ID));
+                fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(MainActivity.CAMERA_FRAGMENT_ID));
 
                 // get document name and add it to the database
                 String documentName = getDocumentName();
