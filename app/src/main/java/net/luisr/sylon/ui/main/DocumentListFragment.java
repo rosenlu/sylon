@@ -223,5 +223,11 @@ public class DocumentListFragment extends Fragment {
     public Group getGroupNoDocuments() {
         return groupNoDocuments;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged(); // force rebind
+    }
 }
 
