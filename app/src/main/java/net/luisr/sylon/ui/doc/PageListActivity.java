@@ -401,6 +401,7 @@ public class PageListActivity extends AppCompatActivity {
      * @param imageUri the URI of the image of the first page.
      */
     private void addPage(String imageUri) {
+        // TODO Thumbnails
         // create a new page with the recorded image
         Page page = Page.makeNew(documentId);
         page.setImageUri(imageUri);
