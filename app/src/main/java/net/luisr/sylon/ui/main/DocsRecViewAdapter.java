@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
@@ -96,6 +97,8 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
                     e.printStackTrace();
                 }
             }
+        } else {
+            holder.imgViewFirstPage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_launcher_background));
         }
 
         // set an OnClickListener for the txtViewOptions

@@ -19,7 +19,6 @@
             android:id="@+id/imgViewFirstPage"
             android:layout_alignParentStart="true"
             android:layout_marginEnd="@dimen/list_item_padding"
-            android:src="@drawable/ic_launcher_background"
             android:background="@drawable/image_view_border"
             android:contentDescription="@string/first_page"/>
 
