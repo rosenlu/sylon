@@ -119,7 +119,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
             details.position = position;
 
             // show the page number
-            txtPageNumber.setText(context.getResources().getString(R.string.page_number, position, page.getId()));
+            txtPageNumber.setText(context.getResources().getString(R.string.page_number, page.getPageNumber(), page.getId()));
 
             this.page = page;
 

@@ -328,9 +328,6 @@ public class PageListActivity extends AppCompatActivity {
             // the position from which the item started
             int fromPosition;
 
-            // the position at which the item was dropped
-            int toPosition;
-
             @Override
             public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
                 super.onSelectedChanged(viewHolder, actionState);
@@ -339,7 +336,6 @@ public class PageListActivity extends AppCompatActivity {
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     if (viewHolder != null) {
                         fromPosition = viewHolder.getAdapterPosition();
-                        toPosition = fromPosition;
                     }
                 }
             }
@@ -353,7 +349,7 @@ public class PageListActivity extends AppCompatActivity {
                 // move the item
                 PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
                 if (pagesAdapter != null) {
-                    movePage(localFromPosition, localToPosition);
+                    pageList.add(localToPosition, pageList.remove(localFromPosition));
                     pagesAdapter.notifyItemMoved(localFromPosition, localToPosition);
                 }
 
@@ -372,7 +368,11 @@ public class PageListActivity extends AppCompatActivity {
                 super.clearView(recyclerView, viewHolder);
 
                 // executed once the item was actually dropped
-                adapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                movePage(fromPosition, viewHolder.getAdapterPosition());
+                PagesRecViewAdapter pagesAdapter = (PagesRecViewAdapter) recyclerView.getAdapter();
+                if (pagesAdapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
             }
         };
     }
@@ -383,8 +383,6 @@ public class PageListActivity extends AppCompatActivity {
      * @param to the new position of the page
      */
     private void movePage(int from, int to) {
-        Page page = pageList.remove(from);
-        pageList.add(to, page);
         if (from > to) {
             for (int i = from; i >= to; i--) {
                 pageList.get(i).setPageNumber(i);
