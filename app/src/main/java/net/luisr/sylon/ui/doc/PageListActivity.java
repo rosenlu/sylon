@@ -1,5 +1,7 @@
 package net.luisr.sylon.ui.doc;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,7 +48,6 @@ public class PageListActivity extends AppCompatActivity {
     public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
     public static final String INTENT_EXTRA_FIRST_PAGE_IMG_URI = "net.luisr.sylon.first_page_img_uri";
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
-    private static final int CAMERA_REQUEST_CODE = 1;
 
     /** The tag used for logging */
     private static final String TAG = "DocumentActivity";
@@ -87,6 +88,14 @@ public class PageListActivity extends AppCompatActivity {
     /** A {@link Group} with all text and image views containing hints when no {@link Page} is found. */
     private Group groupNoPages;
 
+    /**
+     * An activity result launcher to launch the {@link CameraActivity} and get the URI of the saved
+     * image back as a result. The contract is a {@link androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult}
+     * object and callback will handle adding a new {@link Page} with the respective image URI to
+     * the {@link AppDatabase}.
+     */
+    private ActivityResultLauncher<Intent> cameraActivityLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,6 +132,17 @@ public class PageListActivity extends AppCompatActivity {
             addPage(firstPageImageUri);
         }
 
+        // initialize the ActivityResultLauncher for the CameraActivity
+        cameraActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Intent data = result.getData();
+                    if (result.getResultCode() == RESULT_OK && data != null) {
+                        addPage(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
+                    }
+                }
+        );
+
         // set on click listeners for the FAB menu
         setFabMenuOnClickListeners();
 
@@ -148,7 +168,7 @@ public class PageListActivity extends AppCompatActivity {
         // start CameraActivity when camera icon is clicked
         btnAddByCamera.setOnClickListener(v -> {
             Intent intent = new Intent(this, CameraActivity.class);
-            startActivityForResult(intent, CAMERA_REQUEST_CODE);
+            cameraActivityLauncher.launch(intent);
         });
 
         // start GalleryActivity when gallery icon is clicked (not implemented yet)
@@ -415,18 +435,6 @@ public class PageListActivity extends AppCompatActivity {
         pageList.add(page);
         page.setPageNumber(pageList.indexOf(page));
         adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // check if the result came from the CameraActivity
-        if (requestCode == CAMERA_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && data != null) {
-                addPage(data.getStringExtra(CameraActivity.INTENT_EXTRA_IMAGE_URI));
-            }
-        }
     }
 
     @Override
