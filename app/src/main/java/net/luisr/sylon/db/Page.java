@@ -57,6 +57,10 @@ public class Page implements Serializable {
     @ColumnInfo(name = "image_uri")
     private String imageUri;
 
+    /** The URI of the thumbnail of the image associated with the page. */
+    @ColumnInfo(name = "thumb_uri")
+    private String thumbUri;
+
     /** The ID of the parent document. */
     @ColumnInfo(name = "document_id")
     private int documentId;
@@ -104,6 +108,14 @@ public class Page implements Serializable {
 
     public void setImageUri(String imageUri) {
         this.imageUri = imageUri;
+    }
+
+    public String getThumbUri() {
+        return thumbUri;
+    }
+
+    public void setThumbUri(String thumbUri) {
+        this.thumbUri = thumbUri;
     }
 
     public int getDocumentId() {

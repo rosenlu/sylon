@@ -21,7 +21,7 @@ import com.google.android.material.card.MaterialCardView;
 
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.Page;
-import net.luisr.sylon.fs.ImageRotationHandler;
+import net.luisr.sylon.fs.ThumbnailFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -137,11 +137,10 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
         }
 
         private void setImagePreview() throws IOException {
-            Uri imgUri = Uri.parse(page.getImageUri());
+            Uri thumbUri = Uri.parse(page.getThumbUri());
 
-            if (imgUri != null) {
-                Bitmap rotatedBitmap = ImageRotationHandler.handleSamplingAndRotationBitmap(context, imgUri);
-                imgViewPage.setImageBitmap(rotatedBitmap);
+            if (thumbUri != null) {
+                imgViewPage.setImageURI(thumbUri);
             }
         }
 

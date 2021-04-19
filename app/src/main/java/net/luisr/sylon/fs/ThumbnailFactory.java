@@ -6,11 +6,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
+import android.util.Log;
 
 import net.luisr.sylon.db.Document;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * This class handles the different rotations of images on different phones.
@@ -20,7 +24,11 @@ import java.io.InputStream;
  *
  * Credits: Sami Eltamawy, Jason Robinson, Felix
  */
-public class ImageRotationHandler {
+public class ThumbnailFactory {
+
+
+    /** The tag used for logging */
+    private static final String TAG = "ThumbnailFactory";
 
     /**
      * This method is responsible for solving the rotation issue if exist. Also scale the images to
@@ -31,10 +39,10 @@ public class ImageRotationHandler {
      * @return {@link Bitmap} image results
      * @throws IOException if URI does not exist
      */
-    public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
+    public static Uri makeThumbnail(Context context, Uri selectedImage)
             throws IOException {
-        int MAX_HEIGHT = 1024;
-        int MAX_WIDTH = 1024;
+        int MAX_HEIGHT = 100;
+        int MAX_WIDTH = 100;
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -52,7 +60,18 @@ public class ImageRotationHandler {
         Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
 
         img = rotateImageIfRequired(context, img, selectedImage);
-        return img;
+
+        File thumbDir = DirManager.getThumbDirectory(context);
+
+        // TODO make filename unique
+
+        File thumb = new File(thumbDir, selectedImage.getLastPathSegment());
+
+        FileOutputStream out = new FileOutputStream(thumb);
+        img.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        Log.d(TAG, "Thumbnail created and saved to "+thumb.getAbsolutePath());
+
+        return Uri.fromFile(thumb);
     }
 
     /**

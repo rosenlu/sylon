@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import net.luisr.sylon.R;
+import net.luisr.sylon.fs.DirManager;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -90,13 +91,9 @@ public class CameraFragment extends Fragment {
         // bind snapshot button
         view.findViewById(R.id.camera_capture_button).setOnClickListener(v -> takePhoto());
 
-        // check for image directory and create if necessary
-        File outputDirectory = getOutputDirectory();
-        imgDirectory = new File(outputDirectory, "img");
-        if (!imgDirectory.mkdirs() || !imgDirectory.exists()) {
-            // the directory does not exist and we could not create it
-            System.out.println("Could not create img subdir.");
-        }
+
+        imgDirectory = DirManager.getImageDirectory(requireContext());
+
 
         cameraExecutor = Executors.newSingleThreadExecutor();
     }
@@ -148,27 +145,6 @@ public class CameraFragment extends Fragment {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         });
         btnCancel.setOnClickListener(v -> dialog.dismiss());
-    }
-
-    /**
-     * Retrieve either the first external media directory from
-     * {@link ContextWrapper#getExternalMediaDirs()} if it is valid or the "files directory" from
-     * {@link ContextWrapper#getFilesDir()}.
-     * @return the resolved output directory
-     */
-    private File getOutputDirectory() {
-        File[] externalMediaDirs = requireView().getContext().getExternalMediaDirs();
-        File filesDir = requireView().getContext().getFilesDir();
-        if (externalMediaDirs.length != 0) {
-            File firstExtDir = externalMediaDirs[0];
-            if (firstExtDir != null && firstExtDir.exists()) {
-                File subDir = new File(firstExtDir, getString(R.string.app_name));
-                if (subDir.mkdirs() || subDir.exists()) {
-                    return subDir;
-                }
-            }
-        }
-        return filesDir;
     }
 
     /**

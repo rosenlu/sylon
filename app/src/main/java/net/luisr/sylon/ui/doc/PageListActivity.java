@@ -32,9 +32,12 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
+import net.luisr.sylon.fs.ThumbnailFactory;
 import net.luisr.sylon.ui.acquisition.CameraActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -301,6 +304,10 @@ public class PageListActivity extends AppCompatActivity {
                         if (!FileManager.rm(uri)) {
                             Log.w(TAG, "Could not delete source image: " + uri);
                         }
+                        Uri thumbUri = Uri.parse(page.getThumbUri());
+                        if (!FileManager.rm(thumbUri)) {
+                            Log.w(TAG, "Could not delete thumb image: " + thumbUri);
+                        }
 
                         // update page numbers for all following pages
                         for (int i = position; i < pageList.size(); i++) {
@@ -418,17 +425,23 @@ public class PageListActivity extends AppCompatActivity {
 
     /**
      * Add a page to the {@link #database} as well as the {@link #pageList}.
-     * @param imageUri the URI of the image of the first page.
+     * @param imagePath the URI of the image of the first page.
      */
-    private void addPage(String imageUri) {
+    private void addPage(String imagePath) {
         // TODO Thumbnails
         // create a new page with the recorded image
         Page page = Page.makeNew(documentId);
-        page.setImageUri(imageUri);
+        page.setImageUri(imagePath);
 
         // dismiss hints, if pageList was empty
         if (pageList.isEmpty()) {
             groupNoPages.setVisibility(View.GONE);
+        }
+
+        try {
+            page.setThumbUri(ThumbnailFactory.makeThumbnail(this, Uri.parse(imagePath)).toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Error creating thumbnail: " + Arrays.toString(e.getStackTrace()));
         }
 
         // insert the page to the pageList

@@ -29,7 +29,7 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
-import net.luisr.sylon.fs.ImageRotationHandler;
+import net.luisr.sylon.fs.ThumbnailFactory;
 import net.luisr.sylon.ui.doc.PageListActivity;
 
 import java.io.IOException;
@@ -88,14 +88,9 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         // show a preview of the first page in the document, if it exists
         Page firstPage = database.pageDao().getFirstPageInDocument(document.getId());
         if (firstPage != null) {
-            Uri imgUri = Uri.parse(firstPage.getImageUri());
-            if (imgUri != null) {
-                try {
-                    Bitmap rotatedBitmap = ImageRotationHandler.handleSamplingAndRotationBitmap(context, imgUri);
-                    holder.imgViewFirstPage.setImageBitmap(rotatedBitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            Uri thumbUri = Uri.parse(firstPage.getThumbUri());
+            if (thumbUri != null) {
+                holder.imgViewFirstPage.setImageURI(thumbUri);
             }
         } else {
             holder.imgViewFirstPage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_launcher_background));
@@ -246,6 +241,10 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
             Uri uri = Uri.parse(p.getImageUri());
             if (!FileManager.rm(uri)) {
                 Log.w(TAG, "Could not delete source image: " + uri);
+            }
+            Uri thumbUri = Uri.parse(p.getThumbUri());
+            if (!FileManager.rm(thumbUri)) {
+                Log.w(TAG, "Could not delete thumb image: " + thumbUri);
             }
         }
 
