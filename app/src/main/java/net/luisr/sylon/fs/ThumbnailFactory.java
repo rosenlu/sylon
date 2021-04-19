@@ -17,7 +17,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 /**
- * This class handles the different rotations of images on different phones.
+ * This class handles the different rotations of images on different phones
+ * and resizes images to match a maximum width or height.
  *
  * It is based on the Sami Eltamawy on this stackoverflow post:
  * https://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
@@ -32,11 +33,11 @@ public class ThumbnailFactory {
 
     /**
      * This method is responsible for solving the rotation issue if exist. Also scale the images to
-     * 1024x1024 resolution
+     * 100x100 resolution
      *
      * @param context       The current context
      * @param selectedImage The Image URI
-     * @return {@link Bitmap} image results
+     * @return {@link Uri} path to resulting thumbnail
      * @throws IOException if URI does not exist
      */
     public static Uri makeThumbnail(Context context, Uri selectedImage)
