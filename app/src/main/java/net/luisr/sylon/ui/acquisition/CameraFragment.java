@@ -6,6 +6,7 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -57,6 +58,9 @@ public class CameraFragment extends Fragment {
 
     /** Instance for taking a photo */
     private ImageCapture imageCapture = null;
+
+    /** The tag used for logging */
+    private static final String TAG = "CameraFragment";
 
     /** Photo directory */
     private File imgDirectory;
@@ -163,7 +167,7 @@ public class CameraFragment extends Fragment {
                 // Retrieve saved location
                 String savedUri = Uri.fromFile(outputFile).toString();
                 String msg = "Image " + savedUri + " saved successfully!";
-                System.out.println(msg);
+                Log.d(TAG, msg);
 
                 Bundle data = new Bundle();
                 data.putString(BUNDLE_KEY_IMAGE_URI, savedUri);
@@ -173,7 +177,7 @@ public class CameraFragment extends Fragment {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                System.out.println("Image could not be saved: " + exception.getMessage());
+                Log.e(TAG, "Image could not be saved: " + exception.getMessage());
             }
         });
     }
@@ -204,7 +208,7 @@ public class CameraFragment extends Fragment {
                 // finally use the provider to bind our selected camera to this object, the capture object and the UI preview
                 Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageCapture, preview);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Start camera preview failed: "+e.getStackTrace());
             }
         }, ContextCompat.getMainExecutor(requireView().getContext()));
     }

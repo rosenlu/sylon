@@ -44,9 +44,9 @@ public class DirManager {
         // check for image directory and create if necessary
         File outputDirectory = getOutputDirectory(context);
         File imgDirectory = new File(outputDirectory, "img");
-        if (!imgDirectory.mkdirs() || !imgDirectory.exists()) {
+        if (!imgDirectory.mkdirs() && !imgDirectory.exists()) {
             // the directory does not exist and we could not create it
-            Log.w(TAG, "Could not create img subdir.");
+            Log.e(TAG, "Could not create img subdir.");
         }
         return imgDirectory;
     }
@@ -60,9 +60,9 @@ public class DirManager {
         // check for thumb directory and create if necessary
         File outputDirectory = getOutputDirectory(context);
         File thumbDirectory = new File(outputDirectory, "thumb");
-        if (!thumbDirectory.mkdirs() || !thumbDirectory.exists()) {
+        if (!thumbDirectory.mkdirs() && !thumbDirectory.exists()) {
             // the directory does not exist and we could not create it
-            Log.w(TAG, "Could not create thumb subdir.");
+            Log.e(TAG, "Could not create thumb subdir.");
         }
         return thumbDirectory;
     }

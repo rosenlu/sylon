@@ -240,11 +240,11 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
         for (Page p : pages) {
             Uri uri = Uri.parse(p.getImageUri());
             if (!FileManager.rm(uri)) {
-                Log.w(TAG, "Could not delete source image: " + uri);
+                Log.e(TAG, "Could not delete source image: " + uri);
             }
             Uri thumbUri = Uri.parse(p.getThumbUri());
             if (!FileManager.rm(thumbUri)) {
-                Log.w(TAG, "Could not delete thumb image: " + thumbUri);
+                Log.e(TAG, "Could not delete thumb image: " + thumbUri);
             }
         }
 

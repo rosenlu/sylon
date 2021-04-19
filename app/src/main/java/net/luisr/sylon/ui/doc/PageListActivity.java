@@ -53,7 +53,7 @@ public class PageListActivity extends AppCompatActivity {
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
 
     /** The tag used for logging */
-    private static final String TAG = "DocumentActivity";
+    private static final String TAG = "PageListActivity";
 
     /** The app's database containing all documents and pages. */
     private AppDatabase database;
@@ -302,11 +302,11 @@ public class PageListActivity extends AppCompatActivity {
                         }
                         Uri uri = Uri.parse(page.getImageUri());
                         if (!FileManager.rm(uri)) {
-                            Log.w(TAG, "Could not delete source image: " + uri);
+                            Log.e(TAG, "Could not delete source image: " + uri);
                         }
                         Uri thumbUri = Uri.parse(page.getThumbUri());
                         if (!FileManager.rm(thumbUri)) {
-                            Log.w(TAG, "Could not delete thumb image: " + thumbUri);
+                            Log.e(TAG, "Could not delete thumb image: " + thumbUri);
                         }
 
                         // update page numbers for all following pages
@@ -428,7 +428,6 @@ public class PageListActivity extends AppCompatActivity {
      * @param imagePath the URI of the image of the first page.
      */
     private void addPage(String imagePath) {
-        // TODO Thumbnails
         // create a new page with the recorded image
         Page page = Page.makeNew(documentId);
         page.setImageUri(imagePath);

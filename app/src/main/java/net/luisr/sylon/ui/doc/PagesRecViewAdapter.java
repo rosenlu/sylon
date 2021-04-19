@@ -3,6 +3,7 @@ package net.luisr.sylon.ui.doc;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,6 +39,9 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
 
     /** The activity from which the adapter was created. */
     private Activity context;
+
+    /** The tag used for logging */
+    private static final String TAG = "CameraFragment";
 
     /** A list containing all the pages to be shown in the {@link RecyclerView}. */
     private final List<Page> pageList;
@@ -127,7 +131,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
             try {
                 setImagePreview();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Page-bind image preview failed: "+e.getStackTrace());
             }
 
             // set the selected pages as checked

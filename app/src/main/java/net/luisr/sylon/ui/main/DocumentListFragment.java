@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -55,6 +56,9 @@ public class DocumentListFragment extends Fragment {
 
     /** A group with all text and image views containing hints when no {@link Document} is found. */
     private Group groupNoDocuments;
+
+    /** The tag used for logging */
+    private static final String TAG = "DocumentListFragment";
 
     /** Constructor, defining the layout file of the {@link Fragment}. */
     public DocumentListFragment() {
