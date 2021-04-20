@@ -40,6 +40,14 @@ public interface PageDao {
     void update(Page... pages);
 
     /**
+     * Get a {@link Page} entity by its ID.
+     * @param id the ID of the Page.
+     * @return the Page.
+     */
+    @Query("SELECT * FROM pages WHERE id=:id LIMIT 1")
+    Page getById(int id);
+
+    /**
      * Get the number of {@link Page} entities inside a {@link Document}.
      * @param documentId the ID of the Document.
      * @return the number of Pages in the Document.

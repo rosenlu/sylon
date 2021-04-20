@@ -39,4 +39,7 @@
     <string name="snapshot">Take image</string>
     <string name="request_permission_rationale_camera">In order to scan a document, Sylon needs access to your camera. We will only use the camera for the scanning process and nothing else.</string>
 
+    <!-- CropperActivity -->
+    <string name="donut">Donut</string>
+
 </resources>
