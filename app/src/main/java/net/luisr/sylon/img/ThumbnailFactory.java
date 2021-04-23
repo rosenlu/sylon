@@ -19,13 +19,15 @@ import java.io.InputStream;
  */
 public class ThumbnailFactory {
 
+    private static final int MAX_SIZE = 100;
 
     /** The tag used for logging */
     private static final String TAG = "ThumbnailFactory";
 
     /**
-     * This method is responsible for solving the rotation issue if exist. Also scale the images to
-     * 100x100 resolution
+     * Scale an image (from URI) so that the shorter side is {@link #MAX_SIZE} pixels long. Also
+     * calls {@link RotationHandler#rotateImageIfRequired(Context, Bitmap, Uri)} to correct for
+     * possible EXIF rotation.
      *
      * @param context       The current context
      * @param selectedImage The Image URI
@@ -34,8 +36,8 @@ public class ThumbnailFactory {
      */
     public static Uri makeThumbnail(Context context, Uri selectedImage)
             throws IOException {
-        int MAX_HEIGHT = 100;
-        int MAX_WIDTH = 100;
+        int MAX_HEIGHT = MAX_SIZE;
+        int MAX_WIDTH = MAX_SIZE;
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
