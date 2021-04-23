@@ -1,4 +1,4 @@
-package net.luisr.sylon.ui.transform;
+package net.luisr.sylon.ui.acquisition;
 
 import android.net.Uri;
 import android.os.Bundle;

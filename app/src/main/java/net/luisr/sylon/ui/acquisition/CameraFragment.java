@@ -2,7 +2,6 @@ package net.luisr.sylon.ui.acquisition;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;

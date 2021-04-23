@@ -32,7 +32,7 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
-import net.luisr.sylon.fs.ThumbnailFactory;
+import net.luisr.sylon.img.ThumbnailFactory;
 import net.luisr.sylon.ui.acquisition.CameraActivity;
 
 import java.io.IOException;

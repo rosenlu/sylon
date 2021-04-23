@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.acquisition.CameraActivity"/>
-        <activity android:name=".ui.transform.CropperActivity"/>
+        <activity android:name=".ui.acquisition.CropperActivity"/>
     </application>
 
 </manifest>

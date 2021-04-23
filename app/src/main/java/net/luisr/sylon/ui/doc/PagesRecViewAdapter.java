@@ -2,7 +2,6 @@ package net.luisr.sylon.ui.doc;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,8 +22,7 @@ import com.google.android.material.card.MaterialCardView;
 
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.Page;
-import net.luisr.sylon.fs.ThumbnailFactory;
-import net.luisr.sylon.ui.transform.CropperActivity;
+import net.luisr.sylon.ui.acquisition.CropperActivity;
 
 import java.io.IOException;
 import java.util.List;
@@ -125,7 +123,11 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
             details.position = position;
 
             // show the page number
-            txtPageNumber.setText(context.getResources().getString(R.string.page_number, page.getPageNumber(), page.getId()));
+            if (page.isNew()) {
+                txtPageNumber.setText(context.getResources().getString(R.string.page_number_id_unknown, page.getPageNumber()));
+            } else {
+                txtPageNumber.setText(context.getResources().getString(R.string.page_number, page.getPageNumber(), page.getId()));
+            }
 
             this.page = page;
 

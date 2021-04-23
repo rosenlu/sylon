@@ -14,8 +14,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import net.luisr.sylon.R;
 import net.luisr.sylon.ui.acquisition.CameraFragment;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * The Main {@link android.app.Activity} of the app.
  * This activity is the launcher activity and shows a list of all {@link net.luisr.sylon.db.Document}s

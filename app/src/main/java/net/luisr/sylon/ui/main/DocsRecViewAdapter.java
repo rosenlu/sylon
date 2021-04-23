@@ -3,7 +3,6 @@ package net.luisr.sylon.ui.main;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,10 +28,8 @@ import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Document;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.FileManager;
-import net.luisr.sylon.fs.ThumbnailFactory;
 import net.luisr.sylon.ui.doc.PageListActivity;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

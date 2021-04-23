@@ -32,6 +32,7 @@
     <string name="hint_create_page">Click here to create one</string>
     <string name="page_image">Image of the page</string>
     <string name="page_number">%d (ID %d)</string>
+    <string name="page_number_id_unknown">%d (ID ??)</string>
     <string name="selection_title">%d selected</string>
 
     <!-- CameraFragment -->
