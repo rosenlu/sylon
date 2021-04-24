@@ -3,6 +3,7 @@ package net.luisr.sylon.ui.acquisition;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,8 @@ public class CropperActivity extends AppCompatActivity {
 
         imageUri = Uri.parse(getIntent().getStringExtra(INTENT_EXTRA_IMAGE_URI));
         imgViewPage.setImageURI(imageUri);
+
+        RelativeLayout layoutDonuts = findViewById(R.id.layoutDonuts);
 
     }
 }

@@ -11,7 +11,7 @@
     <dimen name="fab_size_small">48dp</dimen>
     <dimen name="fab_margin">20dp</dimen>
 
-    <dimen name="donut_margin_horizontal">60dp</dimen>
-    <dimen name="donut_margin_vertical">120dp</dimen>
+    <dimen name="donut_margin_horizontal">20dp</dimen>
+    <dimen name="donut_margin_vertical">20dp</dimen>
 
 </resources>
