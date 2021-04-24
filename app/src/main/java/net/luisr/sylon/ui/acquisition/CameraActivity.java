@@ -21,8 +21,7 @@ import net.luisr.sylon.ui.doc.PageListActivity;
  * @see PageListActivity
  */
 public class CameraActivity extends AppCompatActivity {
-    public static String CAMERA_FRAGMENT_ID = "net.luisr.sylon.camera_fragment_id";
-    public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.extra_image_uri";
+    public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.camera_captured_image_uri";
 
     /** The fragment manager used to begin the fragment transaction and listen for results of the {@link CameraFragment}. */
     private FragmentManager fragmentManager;
@@ -41,7 +40,7 @@ public class CameraActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.setReorderingAllowed(true);
-            fragmentTransaction.replace(R.id.fragment_container_view, CameraFragment.class, null, CAMERA_FRAGMENT_ID);
+            fragmentTransaction.replace(R.id.fragment_container_view, CameraFragment.class, null, CameraFragment.FRAGMENT_ID);
             fragmentTransaction.commit();
         }
 
@@ -55,7 +54,7 @@ public class CameraActivity extends AppCompatActivity {
      * of this activity accordingly and finish.
      */
     private void listenForFragmentResult() {
-        fragmentManager.setFragmentResultListener(CameraFragment.REQUEST_KEY_CAMERA_FRAGMENT, this, (requestKey, result) -> {
+        fragmentManager.setFragmentResultListener(CameraFragment.RESULT_REQUEST_KEY, this, (requestKey, result) -> {
             // get uri from the bundle
             String savedUri = result.getString(CameraFragment.BUNDLE_KEY_IMAGE_URI);
 

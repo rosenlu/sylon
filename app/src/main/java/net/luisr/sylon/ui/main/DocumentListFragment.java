@@ -38,6 +38,8 @@ import java.util.Locale;
  */
 public class DocumentListFragment extends Fragment {
 
+    public static final String FRAGMENT_ID = "net.luisr.sylon.document_list_fragment_id";
+
     /** The app's database containing all documents and pages. */
     private AppDatabase database;
 
@@ -150,7 +152,7 @@ public class DocumentListFragment extends Fragment {
      */
     private void listenForFragmentResult() {
         FragmentManager fragmentManager = getParentFragmentManager();
-        fragmentManager.setFragmentResultListener(CameraFragment.REQUEST_KEY_CAMERA_FRAGMENT, this, (requestKey, result) -> {
+        fragmentManager.setFragmentResultListener(CameraFragment.RESULT_REQUEST_KEY, this, (requestKey, result) -> {
             // get uri from the bundle
             String savedUri = result.getString(CameraFragment.BUNDLE_KEY_IMAGE_URI);
 
@@ -159,7 +161,7 @@ public class DocumentListFragment extends Fragment {
                 Toast.makeText(requireContext(), R.string.permissions_denied, Toast.LENGTH_SHORT).show();
             } else {  // everything is fine
                 // hide the camera fragment
-                fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(MainActivity.CAMERA_FRAGMENT_ID));
+                fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(CameraFragment.FRAGMENT_ID));
 
                 // get document name and add it to the database
                 String documentName = getDocumentName();

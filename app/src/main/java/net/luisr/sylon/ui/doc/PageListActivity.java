@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  */
 public class PageListActivity extends AppCompatActivity {
 
-    public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.document_id";
+    public static final String INTENT_EXTRA_DOCUMENT_ID = "net.luisr.sylon.page_list_document_id";
     public static final String INTENT_EXTRA_FIRST_PAGE_IMG_URI = "net.luisr.sylon.first_page_img_uri";
     public static final String PAGES_SELECTION_ID = "net.luisr.sylon.pages_selection_id";
 

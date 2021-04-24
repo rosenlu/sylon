@@ -22,9 +22,6 @@ import net.luisr.sylon.ui.acquisition.CameraFragment;
  */
 public class MainActivity extends AppCompatActivity {
 
-    public static String DOCUMENT_LIST_FRAGMENT_ID = "net.luisr.sylon.document_list_fragment_id";
-    public static String CAMERA_FRAGMENT_ID = "net.luisr.sylon.camera_fragment_id";
-
     /** The bottom navigation bar of the layout. */
     private BottomNavigationView bottomNavigationView;
 
@@ -46,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container_view, DocumentListFragment.class, null, DOCUMENT_LIST_FRAGMENT_ID).commit();
+            fragmentTransaction.replace(R.id.fragment_container_view, DocumentListFragment.class, null, DocumentListFragment.FRAGMENT_ID).commit();
         }
 
         // listen for clicks on the bottomNavigationView
@@ -66,17 +63,17 @@ public class MainActivity extends AppCompatActivity {
 
         // check which item was clicked and replace the fragment accordingly
         if (itemId == R.id.itemDocuments) {
-            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CAMERA_FRAGMENT_ID);
+            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CameraFragment.FRAGMENT_ID);
             if (cameraFragment != null) {
                 fragmentManager.beginTransaction().hide(cameraFragment).commit();
             }
             return true;
         } else if (itemId == R.id.itemCamera) {
-            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CAMERA_FRAGMENT_ID);
+            CameraFragment cameraFragment = (CameraFragment) fragmentManager.findFragmentByTag(CameraFragment.FRAGMENT_ID);
             if (cameraFragment != null) {
                 fragmentManager.beginTransaction().show(cameraFragment).commit();
             } else {
-                fragmentManager.beginTransaction().add(R.id.fragment_container_view, CameraFragment.class, null, CAMERA_FRAGMENT_ID).commit();
+                fragmentManager.beginTransaction().add(R.id.fragment_container_view, CameraFragment.class, null, CameraFragment.FRAGMENT_ID).commit();
             }
             return true;
         } else if (itemId == R.id.itemGallery) {

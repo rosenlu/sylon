@@ -13,11 +13,9 @@ import net.luisr.sylon.db.Page;
 
 public class CropperActivity extends AppCompatActivity {
 
-    public static final String INTENT_EXTRA_PAGE_ID = "net.luisr.sylon.page_id";
+    public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.image_uri_to_crop";
 
-    private AppDatabase database;
-    private int pageId;
-    private Page page;
+    private Uri imageUri;
 
     public CropperActivity() {
         super(R.layout.activity_cropper);
@@ -29,10 +27,8 @@ public class CropperActivity extends AppCompatActivity {
 
         ImageView imgViewPage = findViewById(R.id.imgViewPage);
 
-        database = AppDatabase.getInstance(this);
-        pageId = getIntent().getIntExtra(INTENT_EXTRA_PAGE_ID, -1);
-        page = database.pageDao().getById(pageId);
-        imgViewPage.setImageURI(Uri.parse(page.getImageUri()));
+        imageUri = Uri.parse(getIntent().getStringExtra(INTENT_EXTRA_IMAGE_URI));
+        imgViewPage.setImageURI(imageUri);
 
     }
 }

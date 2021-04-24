@@ -146,7 +146,7 @@ public class PagesRecViewAdapter extends RecyclerView.Adapter<PagesRecViewAdapte
             // set on click listener to start CropperActivity
             cardViewParent.setOnClickListener(v -> {
                 Intent intent = new Intent(context.getBaseContext(), CropperActivity.class);
-                intent.putExtra(CropperActivity.INTENT_EXTRA_PAGE_ID, page.getId());
+                intent.putExtra(CropperActivity.INTENT_EXTRA_IMAGE_URI, page.getImageUri());
                 context.startActivity(intent);
             });
         }

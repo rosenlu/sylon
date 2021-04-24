@@ -44,8 +44,9 @@ import java.util.concurrent.Executors;
  */
 public class CameraFragment extends Fragment {
 
-    public static final String REQUEST_KEY_CAMERA_FRAGMENT = "net.luisr.sylon.request_camera_fragment";
-    public static final String BUNDLE_KEY_IMAGE_URI = "net.luisr.sylon.bundle_image_uri";
+    public static final String FRAGMENT_ID = "net.luisr.sylon.camera_fragment_id";
+    public static final String RESULT_REQUEST_KEY = "net.luisr.sylon.request_camera_fragment";
+    public static final String BUNDLE_KEY_IMAGE_URI = "net.luisr.sylon.bundle_image_uri_camera_fragment";
 
 
     /** A launcher to request permissions for the camera */
@@ -119,7 +120,7 @@ public class CameraFragment extends Fragment {
                         // send an empty result to the host activity
                         Bundle data = new Bundle();
                         data.putString(BUNDLE_KEY_IMAGE_URI, "");
-                        getParentFragmentManager().setFragmentResult(REQUEST_KEY_CAMERA_FRAGMENT, data);
+                        getParentFragmentManager().setFragmentResult(RESULT_REQUEST_KEY, data);
                     }
                 });
     }
@@ -170,7 +171,7 @@ public class CameraFragment extends Fragment {
                 Bundle data = new Bundle();
                 data.putString(BUNDLE_KEY_IMAGE_URI, savedUri);
 
-                getParentFragmentManager().setFragmentResult(REQUEST_KEY_CAMERA_FRAGMENT, data);
+                getParentFragmentManager().setFragmentResult(RESULT_REQUEST_KEY, data);
             }
 
             @Override

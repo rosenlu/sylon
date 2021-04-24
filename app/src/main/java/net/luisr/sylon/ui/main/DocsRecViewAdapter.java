@@ -254,7 +254,7 @@ public class DocsRecViewAdapter extends RecyclerView.Adapter<DocsRecViewAdapter.
 
         // show hints, if docList is empty
         if (docList.isEmpty()) {
-            DocumentListFragment documentListFragment = (DocumentListFragment) ((MainActivity) context).getSupportFragmentManager().findFragmentByTag(MainActivity.DOCUMENT_LIST_FRAGMENT_ID);
+            DocumentListFragment documentListFragment = (DocumentListFragment) ((MainActivity) context).getSupportFragmentManager().findFragmentByTag(DocumentListFragment.FRAGMENT_ID);
             if (documentListFragment != null) {
                 documentListFragment.getGroupNoDocuments().setVisibility(View.VISIBLE);
             }
