@@ -470,4 +470,11 @@ public class PageListActivity extends AppCompatActivity {
         pageList.stream().filter(Page::hasBeenModified).collect(Collectors.toList()).forEach(p -> p.setModified(false));
         pageList.stream().filter(Page::isNew).collect(Collectors.toList()).forEach(Page::clearNew);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        adapter.notifyDataSetChanged();
+    }
 }

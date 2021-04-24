@@ -36,6 +36,8 @@ public class CameraActivity extends AppCompatActivity {
 
         fragmentManager = getSupportFragmentManager();
 
+        setTitle(R.string.camera_title);
+
         // start fragment transaction with default fragment (CameraFragment)
         if (savedInstanceState == null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
