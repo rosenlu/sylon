@@ -16,7 +16,7 @@ import java.io.InputStream;
 /**
  * This class handles the different rotations of images on different phones.
  *
- * It is based on the Sami Eltamawy on this stackoverflow post:
+ * It is based on Sami Eltamawy's answer to this stackoverflow post:
  * https://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
  *
  * Credits: Sami Eltamawy, Jason Robinson, Felix

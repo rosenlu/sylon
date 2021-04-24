@@ -16,6 +16,11 @@ import java.io.InputStream;
 
 /**
  * This class resizes an image to match a maximum width or height and then saves it to a file.
+ *
+ * It is partially based on Sami Eltamawy's answer to this stackoverflow post:
+ * https://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
+ *
+ * Credits: Sami Eltamawy, Jason Robinson, Felix
  */
 public class ThumbnailFactory {
 
