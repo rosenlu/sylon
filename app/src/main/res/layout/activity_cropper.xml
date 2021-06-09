@@ -7,7 +7,7 @@
     android:gravity="center"
     >
 
-    <ImageView
+    <net.luisr.sylon.ui.acquisition.CropperView
         android:id="@+id/imgViewPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,26 +20,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imgViewPage"
-        app:layout_constraintEnd_toEndOf="@+id/imgViewPage"
-        app:layout_constraintStart_toStartOf="@+id/imgViewPage"
-        app:layout_constraintTop_toTopOf="@+id/imgViewPage">
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/relativeLayout"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="0dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/imgViewPage"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/imgViewPage"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/imgViewPage"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/imgViewPage">-->
 
-        <ImageView
-            android:id="@+id/donutTopLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="100px"
-            android:layout_marginTop="100px"
-            android:contentDescription="@string/donut"
-            android:src="@drawable/ic_baseline_donut_large_24" />
+<!--        <ImageView-->
+<!--            android:id="@+id/donutTopLeft"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentLeft="true"-->
+<!--            android:layout_alignParentTop="true"-->
+<!--            android:layout_marginLeft="100px"-->
+<!--            android:layout_marginTop="100px"-->
+<!--            android:contentDescription="@string/donut"-->
+<!--            android:src="@drawable/ic_baseline_donut_large_24" />-->
 
-    </RelativeLayout>
+<!--    </RelativeLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
