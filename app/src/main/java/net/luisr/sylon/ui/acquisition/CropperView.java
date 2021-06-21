@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
@@ -13,6 +15,7 @@ import androidx.annotation.Nullable;
  * Based on SmartCropper by pqpo (https://github.com/pqpo/SmartCropper)
  */
 public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
+    // TODO: handle rotation of image... see RotationHandler
 
     /** The pixel density of the screen. */
     private float pixelDensity;
@@ -29,6 +32,15 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
     /** Scale between pixels on the display and pixels on the image. */
     private float scaleX, scaleY;
 
+    /**
+     * An array containing all for corner points of the cropper.
+     * Note: So far this only contains one point for testing purposes!
+     */
+    Point[] cornerPoints;
+
+    /** The point that is currently being dragged by the user. */
+    Point draggingPoint;
+
     /** Paints for different parts of the {@link CropperView}. */
     private Paint pointPaint;  // corner points of the cropper
 
@@ -44,6 +56,9 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         super(context, attrs, defStyleAttr);
         pixelDensity = getResources().getDisplayMetrics().density;
         initPaints();
+
+        cornerPoints = new Point[1];  // only one point for testing, later this should be 4
+        cornerPoints[0] = new Point(420, 690);
     }
 
     private void initPaints() {
@@ -70,8 +85,52 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             actualTop = (getHeight() - actualHeight) / 2;
         }
 
-        canvas.drawCircle(getActualX(420), getActualY(690), dp2px(15), pointPaint);
+        canvas.drawCircle(getActualX(cornerPoints[0].x), getActualY(cornerPoints[0].y), dp2px(15), pointPaint);
 
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        boolean handleTouchEvent = true;
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                draggingPoint = getNearbyPoint(event);
+                if (draggingPoint == null) {
+                    handleTouchEvent = false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                // x and y of Points are in intrinsic system (relative to image edges)
+                // x and y of event are in actual system (relative to screen edges)
+                int x = (int) ((Math.min(Math.max(event.getX(), actualLeft), actualLeft + actualWidth) - actualLeft) / scaleX);
+                int y = (int) ((Math.min(Math.max(event.getY(), actualTop), actualTop + actualHeight) - actualTop) / scaleY);
+                draggingPoint.x = x;
+                draggingPoint.y = y;
+                break;
+            case MotionEvent.ACTION_UP:
+                draggingPoint = null;
+                break;
+        }
+
+        invalidate();
+        return handleTouchEvent || super.onTouchEvent(event);
+    }
+
+    private Point getNearbyPoint(MotionEvent event) {
+        for (Point p : cornerPoints) {
+            boolean pointIsNearby = false;
+            float xEvent = event.getX();
+            float yEvent = event.getY();
+            float xPoint = p.x * scaleX + actualLeft;
+            float yPoint = p.y * scaleY + actualTop;
+            double distance =  Math.sqrt(Math.pow(xEvent - xPoint, 2) + Math.pow(yEvent - yPoint, 2));
+            if (distance < dp2px(20)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     private float getActualX(float intrinsicX) {
