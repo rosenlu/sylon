@@ -14,12 +14,23 @@ import androidx.annotation.Nullable;
  */
 public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
-    private float scaleX, scaleY;
+    /** The pixel density of the screen. */
+    private float pixelDensity;
+
+    /**
+     * Variables with the prefix 'actual' refer to pixels on the screen.
+     * Variables with the prefix 'intrinsic' refer to pixels on the image.
+     */
     private int actualWidth, actualHeight, actualLeft, actualTop;
 
-    private float[] matrixValue = new float[9];
+    /** The values of the image matrix. */
+    private float[] imageMatrixValue = new float[9];
 
-    private Paint pointPaint;
+    /** Scale between pixels on the display and pixels on the image. */
+    private float scaleX, scaleY;
+
+    /** Paints for different parts of the {@link CropperView}. */
+    private Paint pointPaint;  // corner points of the cropper
 
     public CropperView(Context context) {
         this(context, null);
@@ -31,12 +42,15 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     public CropperView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
+        pixelDensity = getResources().getDisplayMetrics().density;
         initPaints();
     }
 
     private void initPaints() {
         pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        pointPaint.setColor(0xFFEEEEEE);  // argb
+        pointPaint.setStrokeWidth(dp2px(2));
+        pointPaint.setStyle(Paint.Style.STROKE);
     }
 
     @Override
@@ -45,9 +59,9 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
         Drawable drawable = getDrawable();
         if (drawable != null) {
-            getImageMatrix().getValues(matrixValue);
-            scaleX = matrixValue[Matrix.MSCALE_X];
-            scaleY = matrixValue[Matrix.MSCALE_Y];
+            getImageMatrix().getValues(imageMatrixValue);
+            scaleX = imageMatrixValue[Matrix.MSCALE_X];
+            scaleY = imageMatrixValue[Matrix.MSCALE_Y];
             int intrinsicWidth = drawable.getIntrinsicWidth();
             int intrinsicHeight = drawable.getIntrinsicHeight();
             actualWidth = Math.round(intrinsicWidth * scaleX);
@@ -56,11 +70,7 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             actualTop = (getHeight() - actualHeight) / 2;
         }
 
-        pointPaint.setColor(0xFF0000FF);
-        pointPaint.setStrokeWidth(5);
-        pointPaint.setStyle(Paint.Style.STROKE);
-
-        canvas.drawCircle(getActualX(420), getActualY(69), 50, pointPaint);
+        canvas.drawCircle(getActualX(420), getActualY(690), dp2px(15), pointPaint);
 
     }
 
@@ -70,6 +80,10 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     private float getActualY(float intrinsicY) {
         return intrinsicY * scaleY + actualTop;
+    }
+
+    private float dp2px(float dp) {
+        return dp * pixelDensity;
     }
 
 }
