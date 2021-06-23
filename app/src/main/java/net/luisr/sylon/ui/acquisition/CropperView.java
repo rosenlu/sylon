@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
@@ -16,6 +17,17 @@ import androidx.annotation.Nullable;
  */
 public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
     // TODO: handle rotation of image... see RotationHandler
+
+    /** Tag for logging. */
+    private static final String TAG = "CropperView";
+
+    /** Color variables. */
+    private static final int LINE_COLOR = 0xFFEEEEEE;
+
+    /** Distances and widths. All units are dp. */
+    private static final float LINE_WIDTH = 2;
+    private static final float CORNER_POINT_RADIUS = 15;
+    private static final float TOUCH_POINT_CATCH_DISTANCE = 20;
 
     /** The pixel density of the screen. */
     private float pixelDensity;
@@ -57,14 +69,13 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         pixelDensity = getResources().getDisplayMetrics().density;
         initPaints();
 
-        cornerPoints = new Point[1];  // only one point for testing, later this should be 4
-        cornerPoints[0] = new Point(420, 690);
+        cornerPoints = new Point[4];
     }
 
     private void initPaints() {
         pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        pointPaint.setColor(0xFFEEEEEE);  // argb
-        pointPaint.setStrokeWidth(dp2px(2));
+        pointPaint.setColor(LINE_COLOR);  // argb
+        pointPaint.setStrokeWidth(dp2px(LINE_WIDTH));
         pointPaint.setStyle(Paint.Style.STROKE);
     }
 
@@ -85,10 +96,15 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             actualTop = (getHeight() - actualHeight) / 2;
         }
 
-        canvas.drawCircle(getActualX(cornerPoints[0].x), getActualY(cornerPoints[0].y), dp2px(15), pointPaint);
+        if (pointsAreValid(cornerPoints)) {
+            for (Point p : cornerPoints) {
+                canvas.drawCircle(getActualX(p.x), getActualY(p.y), dp2px(CORNER_POINT_RADIUS), pointPaint);
+            }
+        }
 
     }
 
+    // TODO: also override performClick to allow Accessibility features. See https://stackoverflow.com/questions/27462468/custom-view-overrides-ontouchevent-but-not-performclick
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -120,13 +136,12 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     private Point getNearbyPoint(MotionEvent event) {
         for (Point p : cornerPoints) {
-            boolean pointIsNearby = false;
             float xEvent = event.getX();
             float yEvent = event.getY();
             float xPoint = p.x * scaleX + actualLeft;
             float yPoint = p.y * scaleY + actualTop;
             double distance =  Math.sqrt(Math.pow(xEvent - xPoint, 2) + Math.pow(yEvent - yPoint, 2));
-            if (distance < dp2px(20)) {
+            if (distance < dp2px(TOUCH_POINT_CATCH_DISTANCE)) {
                 return p;
             }
         }
@@ -143,6 +158,22 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     private float dp2px(float dp) {
         return dp * pixelDensity;
+    }
+
+    public void setCornerPoints(Point[] cornerPoints) {
+        if (getDrawable() == null) {
+            Log.w(TAG, "Must be called after drawable has been set.");
+        } else if (!pointsAreValid(cornerPoints)) {
+            Log.w(TAG, "Passed cornerPoints are invalid.");
+        } else {
+            this.cornerPoints = cornerPoints;
+            invalidate();
+        }
+    }
+
+    private boolean pointsAreValid(Point[] points) {
+        return points != null && points.length == 4
+                && points[0] != null && points[1] != null && points[2] != null && points[3] != null;
     }
 
 }
