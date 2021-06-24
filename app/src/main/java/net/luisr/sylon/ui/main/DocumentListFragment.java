@@ -173,7 +173,7 @@ public class DocumentListFragment extends Fragment {
     }
 
     /**
-     * Get a unique name for a newly create {@link Document}.
+     * Get a unique name for a newly created {@link Document}.
      * @return the unique Document name
      */
     private String getDocumentName() {

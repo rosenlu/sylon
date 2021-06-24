@@ -2,8 +2,10 @@ package net.luisr.sylon.ui.acquisition;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -22,12 +24,20 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
     private static final String TAG = "CropperView";
 
     /** Color variables. */
-    private static final int LINE_COLOR = 0xFFEEEEEE;
+    private static final int LINE_COLOR_LIGHT = 0xFFEEEEEE;  // argb
+    private static final int LINE_COLOR_DARK = 0xFF111111;
 
     /** Distances and widths. All units are dp. */
     private static final float LINE_WIDTH = 2;
     private static final float CORNER_POINT_RADIUS = 15;
-    private static final float TOUCH_POINT_CATCH_DISTANCE = 20;
+    private static final float TOUCH_POINT_CATCH_DISTANCE = 30;
+
+    /** Indices of points in crop */
+    private static final int INDEX_NONE = -1;
+    private static final int TOP_LEFT = 0;
+    private static final int BOTTOM_LEFT = 1;
+    private static final int BOTTOM_RIGHT = 2;
+    private static final int TOP_RIGHT = 3;
 
     /** The pixel density of the screen. */
     private float pixelDensity;
@@ -44,17 +54,23 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
     /** Scale between pixels on the display and pixels on the image. */
     private float scaleX, scaleY;
 
+    /** Size of the displayed image in intrinsic pixels */
+    private Point intrinsicSize;
+
     /**
      * An array containing all for corner points of the cropper.
      * Note: So far this only contains one point for testing purposes!
      */
-    Point[] cornerPoints;
+    private Point[] cornerPoints;
 
-    /** The point that is currently being dragged by the user. */
-    Point draggingPoint;
+    /** Path through all 4 {@link CropperView#cornerPoints} */
+    private Path framePath;
+
+    /** The index of the point that is currently being dragged by the user. */
+    private int draggingPointIndex;
 
     /** Paints for different parts of the {@link CropperView}. */
-    private Paint pointPaint;  // corner points of the cropper
+    private Paint lightLinePaint, darkLinePaint, darkDottedLinePaint;
 
     public CropperView(Context context) {
         this(context, null);
@@ -66,17 +82,33 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     public CropperView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        intrinsicSize = new Point(0, 0);
+
         pixelDensity = getResources().getDisplayMetrics().density;
         initPaints();
 
         cornerPoints = new Point[4];
+
+        framePath = new Path();
     }
 
     private void initPaints() {
-        pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        pointPaint.setColor(LINE_COLOR);  // argb
-        pointPaint.setStrokeWidth(dp2px(LINE_WIDTH));
-        pointPaint.setStyle(Paint.Style.STROKE);
+        lightLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        lightLinePaint.setColor(LINE_COLOR_LIGHT);
+        lightLinePaint.setStrokeWidth(dp2px(LINE_WIDTH));
+        lightLinePaint.setStyle(Paint.Style.STROKE);
+
+        darkLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        darkLinePaint.setColor(LINE_COLOR_DARK);
+        darkLinePaint.setStrokeWidth(dp2px(LINE_WIDTH));
+        darkLinePaint.setStyle(Paint.Style.STROKE);
+
+        darkDottedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        darkDottedLinePaint.setColor(LINE_COLOR_DARK);
+        darkDottedLinePaint.setStrokeWidth(dp2px(LINE_WIDTH));
+        darkDottedLinePaint.setStyle(Paint.Style.STROKE);
+        darkDottedLinePaint.setPathEffect(new DashPathEffect(new float[] {dp2px(LINE_WIDTH*5), dp2px(LINE_WIDTH*5)}, 0f));
     }
 
     @Override
@@ -90,6 +122,11 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             scaleY = imageMatrixValue[Matrix.MSCALE_Y];
             int intrinsicWidth = drawable.getIntrinsicWidth();
             int intrinsicHeight = drawable.getIntrinsicHeight();
+            if (!intrinsicSize.equals(intrinsicWidth, intrinsicHeight)) {
+                intrinsicSize.set(intrinsicWidth, intrinsicHeight);
+                // do stuff on image load
+            }
+
             actualWidth = Math.round(intrinsicWidth * scaleX);
             actualHeight = Math.round(intrinsicHeight * scaleY);
             actualLeft = (getWidth() - actualWidth) / 2;
@@ -98,8 +135,14 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
         if (pointsAreValid(cornerPoints)) {
             for (Point p : cornerPoints) {
-                canvas.drawCircle(getActualX(p.x), getActualY(p.y), dp2px(CORNER_POINT_RADIUS), pointPaint);
+                canvas.drawCircle(getActualX(p.x), getActualY(p.y), dp2px(CORNER_POINT_RADIUS), lightLinePaint);
+                canvas.drawCircle(getActualX(p.x), getActualY(p.y), dp2px(CORNER_POINT_RADIUS + LINE_WIDTH), darkLinePaint);
             }
+
+            updatePath();
+
+            canvas.drawPath(framePath, lightLinePaint);
+            canvas.drawPath(framePath, darkDottedLinePaint);
         }
 
     }
@@ -112,8 +155,8 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                draggingPoint = getNearbyPoint(event);
-                if (draggingPoint == null) {
+                draggingPointIndex = getNearbyPointIndex(event);
+                if (draggingPointIndex == INDEX_NONE) {
                     handleTouchEvent = false;
                 }
                 break;
@@ -122,11 +165,16 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
                 // x and y of event are in actual system (relative to screen edges)
                 int x = (int) ((Math.min(Math.max(event.getX(), actualLeft), actualLeft + actualWidth) - actualLeft) / scaleX);
                 int y = (int) ((Math.min(Math.max(event.getY(), actualTop), actualTop + actualHeight) - actualTop) / scaleY);
-                draggingPoint.x = x;
-                draggingPoint.y = y;
+
+
+
+                if (draggingPointIndex != INDEX_NONE) {
+                    cornerPoints[draggingPointIndex].x = x;
+                    cornerPoints[draggingPointIndex].y = y;
+                }
                 break;
             case MotionEvent.ACTION_UP:
-                draggingPoint = null;
+                draggingPointIndex = INDEX_NONE;
                 break;
         }
 
@@ -134,18 +182,18 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         return handleTouchEvent || super.onTouchEvent(event);
     }
 
-    private Point getNearbyPoint(MotionEvent event) {
-        for (Point p : cornerPoints) {
+    private int getNearbyPointIndex(MotionEvent event) {
+        for (int i=0; i<cornerPoints.length; i++) {
             float xEvent = event.getX();
             float yEvent = event.getY();
-            float xPoint = p.x * scaleX + actualLeft;
-            float yPoint = p.y * scaleY + actualTop;
+            float xPoint = cornerPoints[i].x * scaleX + actualLeft;
+            float yPoint = cornerPoints[i].y * scaleY + actualTop;
             double distance =  Math.sqrt(Math.pow(xEvent - xPoint, 2) + Math.pow(yEvent - yPoint, 2));
             if (distance < dp2px(TOUCH_POINT_CATCH_DISTANCE)) {
-                return p;
+                return i;
             }
         }
-        return null;
+        return INDEX_NONE;
     }
 
     private float getActualX(float intrinsicX) {
@@ -171,9 +219,22 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         }
     }
 
+    public Point[] getCornerPoints() {
+        return cornerPoints;
+    }
+
     private boolean pointsAreValid(Point[] points) {
         return points != null && points.length == 4
                 && points[0] != null && points[1] != null && points[2] != null && points[3] != null;
+    }
+
+    private void updatePath() {
+        framePath.reset();
+        framePath.moveTo(getActualX(cornerPoints[0].x), getActualY(cornerPoints[0].y));
+        framePath.lineTo(getActualX(cornerPoints[1].x), getActualY(cornerPoints[1].y));
+        framePath.lineTo(getActualX(cornerPoints[2].x), getActualY(cornerPoints[2].y));
+        framePath.lineTo(getActualX(cornerPoints[3].x), getActualY(cornerPoints[3].y));
+        framePath.close();
     }
 
 }

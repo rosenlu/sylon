@@ -45,5 +45,6 @@
 
     <!-- CropperActivity -->
     <string name="donut">Donut</string>
+    <string name="save_crop">Save Crop</string>
 
 </resources>
