@@ -180,6 +180,11 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         return handleTouchEvent || super.onTouchEvent(event);
     }
 
+    /**
+     * Find the index of the first point that is within the {@link CropperView#TOUCH_POINT_CATCH_DISTANCE}.
+     * @param event The MotionEvent.
+     * @return the index of the point.
+     */
     private int getNearbyPointIndex(MotionEvent event) {
         for (int i=0; i<cornerPoints.length; i++) {
             float xEvent = event.getX();
@@ -231,14 +236,51 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         return result1 < 0 && result2 < 0 && result3 < 0;
     }
 
+    /**
+     * Update the path that is spanned by the cornerPoints.
+     */
+    private void updatePath() {
+        framePath.reset();
+        framePath.moveTo(getActualX(cornerPoints[0].x), getActualY(cornerPoints[0].y));
+        framePath.lineTo(getActualX(cornerPoints[1].x), getActualY(cornerPoints[1].y));
+        framePath.lineTo(getActualX(cornerPoints[2].x), getActualY(cornerPoints[2].y));
+        framePath.lineTo(getActualX(cornerPoints[3].x), getActualY(cornerPoints[3].y));
+        framePath.close();
+    }
+
+    /**
+     * Check weather a point array is valid, i.e. has a length of 4 and no nulls.
+     * @param points The point array to check.
+     * @return weather the point array is valid.
+     */
+    private boolean pointsAreValid(Point[] points) {
+        return points != null && points.length == 4
+                && points[0] != null && points[1] != null && points[2] != null && points[3] != null;
+    }
+
+    /**
+     * Get the X value in regard to the view/screen (actual X) from an X value in the image (instrinsic X).
+     * @param intrinsicX The X value in the image.
+     * @return The X value in the view/screen.
+     */
     private float getActualX(float intrinsicX) {
         return intrinsicX * scaleX + actualLeft;
     }
 
+    /**
+     * Get the Y value in regard to the view/screen (actual Y) from an Y value in the image (instrinsic Y).
+     * @param intrinsicY The Y value in the image.
+     * @return The Y value in the view/screen.
+     */
     private float getActualY(float intrinsicY) {
         return intrinsicY * scaleY + actualTop;
     }
 
+    /**
+     * Convert from density-independent pixels (dp) to actual pixels (px).
+     * @param dp The value in dp.
+     * @return The value in px.
+     */
     private float dp2px(float dp) {
         return dp * pixelDensity;
     }
@@ -256,20 +298,6 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
 
     public Point[] getCornerPoints() {
         return cornerPoints;
-    }
-
-    private boolean pointsAreValid(Point[] points) {
-        return points != null && points.length == 4
-                && points[0] != null && points[1] != null && points[2] != null && points[3] != null;
-    }
-
-    private void updatePath() {
-        framePath.reset();
-        framePath.moveTo(getActualX(cornerPoints[0].x), getActualY(cornerPoints[0].y));
-        framePath.lineTo(getActualX(cornerPoints[1].x), getActualY(cornerPoints[1].y));
-        framePath.lineTo(getActualX(cornerPoints[2].x), getActualY(cornerPoints[2].y));
-        framePath.lineTo(getActualX(cornerPoints[3].x), getActualY(cornerPoints[3].y));
-        framePath.close();
     }
 
 }
