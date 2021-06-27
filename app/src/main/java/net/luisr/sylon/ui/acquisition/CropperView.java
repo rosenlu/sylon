@@ -14,6 +14,8 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
+import javax.vecmath.Vector2d;
+
 /**
  * Based on SmartCropper by pqpo (https://github.com/pqpo/SmartCropper)
  */
@@ -169,6 +171,12 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
                 if (pointIsDraggable(newX, newY)) {
                     cornerPoints[draggingPointIndex].x = newX;
                     cornerPoints[draggingPointIndex].y = newY;
+                } else {
+                    Point newP = getClosestAllowedPoint(newX, newY);
+                    if (newP != null) {
+                        cornerPoints[draggingPointIndex].x = newP.x;
+                        cornerPoints[draggingPointIndex].y = newP.y;
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -215,25 +223,112 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             return false;
         }
 
-        // the new position of the dragging point
-        Point p = new Point(newX, newY);
-
         // the remaining 3 points starting clockwise from the dragging point
         Point p1 = cornerPoints[(draggingPointIndex + 1) % 4];
         Point p2 = cornerPoints[(draggingPointIndex + 2) % 4];
         Point p3 = cornerPoints[(draggingPointIndex + 3) % 4];
 
         // p1 -> p2
-        int result1 = (p.y - p1.y) * (p2.x - p1.x) - (p.x - p1.x) * (p2.y - p1.y);
+        int result12 = (newY - p1.y) * (p2.x - p1.x) - (newX - p1.x) * (p2.y - p1.y);
 
         // p2 -> p3
-        int result2 = (p.y - p2.y) * (p3.x - p2.x) - (p.x - p2.x) * (p3.y - p2.y);
+        int result23 = (newY - p2.y) * (p3.x - p2.x) - (newX - p2.x) * (p3.y - p2.y);
 
         // p1 -> p3
-        int result3 = (p.y - p1.y) * (p3.x - p1.x) - (p.x - p1.x) * (p3.y - p1.y);
+        int result13 = (newY - p1.y) * (p3.x - p1.x) - (newX - p1.x) * (p3.y - p1.y);
 
         // p must lie left of each one of these lines
-        return result1 < 0 && result2 < 0 && result3 < 0;
+        return result12 < 0 && result23 < 0 && result13 < 0;
+    }
+
+    /**
+     * Get the closest allowed point from the new X and Y coordinates.
+     * TODO: returning exactly p1/p2/p3 results in PolyToPoly transformation being impossible! Maybe move points a tiny bit in bisecting direction.
+     * @param newX the new X coordinate of the dragging point.
+     * @param newY the new Y coordinate of the dragging point.
+     * @return The closest allowed point.
+     */
+    private Point getClosestAllowedPoint(int newX, int newY) {
+        if (draggingPointIndex == INDEX_NONE) {
+            return null;
+        }
+
+        // the remaining 3 points starting clockwise from the dragging point
+        Point p1 = cornerPoints[(draggingPointIndex + 1) % 4];
+        Point p2 = cornerPoints[(draggingPointIndex + 2) % 4];
+        Point p3 = cornerPoints[(draggingPointIndex + 3) % 4];
+
+        // calculate unit vectors between the lines
+        Vector2d v12 = new Vector2d(p2.x - p1.x, p2.y - p1.y);
+        Vector2d v23 = new Vector2d(p3.x - p2.x, p3.y - p2.y);
+        Vector2d v13 = new Vector2d(p3.x - p1.x, p3.y - p1.y);
+        v12.normalize();
+        v23.normalize();
+        v13.normalize();
+
+        // calculate bisecting vectors at p1 and p3
+        Vector2d bisectorP1 = (Vector2d) v12.clone();
+        bisectorP1.sub(v13);
+        bisectorP1.normalize();
+        Vector2d bisectorP3 = (Vector2d) v13.clone();
+        bisectorP3.sub(v23);
+        bisectorP3.normalize();
+
+        // calculate perpendicular vectors
+        @SuppressWarnings("SuspiciousNameCombination")
+        Vector2d perpendicularToV12 = new Vector2d(- v12.y, v12.x);
+        @SuppressWarnings("SuspiciousNameCombination")
+        Vector2d perpendicularToV23 = new Vector2d(- v23.y, v23.x);
+        @SuppressWarnings("SuspiciousNameCombination")
+        Vector2d perpendicularToV13 = new Vector2d(- v13.y, v13.x);
+
+        // calculate some booleans used below
+        boolean isRightOfBisectorP1 = (newY - p1.y) * (p1.x + bisectorP1.x - p1.x) - (newX - p1.x) * (p1.y + bisectorP1.y - p1.y) > 0;
+        boolean isLeftOfBisectorP3 = (newY - p3.y) * (p3.x + bisectorP3.x - p3.x) - (newX - p3.x) * (p3.y + bisectorP3.y - p3.y) < 0;
+        boolean isLeftOfPerpendicularToV12InP1 = (newY - p1.y) * (p1.x + perpendicularToV12.x - p1.x) - (newX - p1.x) * (p1.y + perpendicularToV12.y - p1.y) < 0;
+        boolean isRightOfPerpendicularToV23InP3 = (newY - p3.y) * (p3.x + perpendicularToV23.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV23.y - p3.y) > 0;
+        boolean isRightOfPerpendicularToV13InP1 = (newY - p1.y) * (p1.x + perpendicularToV13.x - p1.x) - (newX - p1.x) * (p1.y + perpendicularToV13.y - p1.y) > 0;
+        boolean isLeftOfPerpendicularToV13InP3 = (newY - p3.y) * (p3.x + perpendicularToV13.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV13.y - p3.y) < 0;
+
+        // check which line (p1 -> p2, p2 -> p3 or p1 -> p3) should be used to get closest allowed point
+        Point baseline1;
+        Point baseline2;
+        if (isRightOfBisectorP1) {
+            if (isLeftOfPerpendicularToV12InP1) {
+                return p1;
+            } else {
+                // choose p1 -> p2 as baseline
+                baseline1 = p1;
+                baseline2 = p2;
+            }
+        } else if (isLeftOfBisectorP3) {
+            if (isRightOfPerpendicularToV23InP3) {
+                return p3;
+            } else {
+                // choose p2 -> p3 as baseline
+                baseline1 = p2;
+                baseline2 = p3;
+            }
+        } else {  // is in between
+            if (isRightOfPerpendicularToV13InP1) {
+                return p1;
+            } else if (isLeftOfPerpendicularToV13InP3) {
+                return p3;
+            } else {
+                // choose p1 -> p3 as baseline
+                baseline1 = p1;
+                baseline2 = p3;
+            }
+        }
+
+        // calculate the closest allowed point by finding the perpendicular intersection of
+        // (newX, newY) with the baseline
+        double k = ((baseline2.y - baseline1.y) * (newX - baseline1.x) - (baseline2.x - baseline1.x) * (newY - baseline1.y))
+                / (Math.pow(baseline2.y - baseline1.y, 2) + Math.pow(baseline2.x - baseline1.x, 2));
+        return new Point(
+                (int) (newX - k * (baseline2.y - baseline1.y)),
+                (int) (newY + k * (baseline2.x - baseline1.x))
+        );
     }
 
     /**
