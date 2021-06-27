@@ -163,14 +163,12 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             case MotionEvent.ACTION_MOVE:
                 // x and y of Points are in intrinsic system (relative to image edges)
                 // x and y of event are in actual system (relative to screen edges)
-                int x = (int) ((Math.min(Math.max(event.getX(), actualLeft), actualLeft + actualWidth) - actualLeft) / scaleX);
-                int y = (int) ((Math.min(Math.max(event.getY(), actualTop), actualTop + actualHeight) - actualTop) / scaleY);
+                int newX = (int) ((Math.min(Math.max(event.getX(), actualLeft), actualLeft + actualWidth) - actualLeft) / scaleX);
+                int newY = (int) ((Math.min(Math.max(event.getY(), actualTop), actualTop + actualHeight) - actualTop) / scaleY);
 
-
-
-                if (draggingPointIndex != INDEX_NONE) {
-                    cornerPoints[draggingPointIndex].x = x;
-                    cornerPoints[draggingPointIndex].y = y;
+                if (pointIsDraggable(newX, newY)) {
+                    cornerPoints[draggingPointIndex].x = newX;
+                    cornerPoints[draggingPointIndex].y = newY;
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -194,6 +192,43 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
             }
         }
         return INDEX_NONE;
+    }
+
+    /**
+     * Checks weather the new x and y coordinates of a point are allowed.
+     * Every point must be inside the polygon spanned by the remaining 3 points and
+     * the edges of the screen. This polygon is always convex. Thus it is sufficient to
+     * check on which side of the lines spanned by each pair of the remaining points the dragging
+     * point is situated.
+     * @param newX the new X coordinate of the dragging point.
+     * @param newY the new Y coordinate of the dragging point.
+     * @return weather the new coordinates are allowed or not.
+     * @see <a href="https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119#4e3e">https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119#4e3e</a>
+     */
+    private boolean pointIsDraggable(int newX, int newY) {
+        if (draggingPointIndex == INDEX_NONE) {
+            return false;
+        }
+
+        // the new position of the dragging point
+        Point p = new Point(newX, newY);
+
+        // the remaining 3 points starting clockwise from the dragging point
+        Point p1 = cornerPoints[(draggingPointIndex + 1) % 4];
+        Point p2 = cornerPoints[(draggingPointIndex + 2) % 4];
+        Point p3 = cornerPoints[(draggingPointIndex + 3) % 4];
+
+        // p1 -> p2
+        int result1 = (p.y - p1.y) * (p2.x - p1.x) - (p.x - p1.x) * (p2.y - p1.y);
+
+        // p2 -> p3
+        int result2 = (p.y - p2.y) * (p3.x - p2.x) - (p.x - p2.x) * (p3.y - p2.y);
+
+        // p1 -> p3
+        int result3 = (p.y - p1.y) * (p3.x - p1.x) - (p.x - p1.x) * (p3.y - p1.y);
+
+        // p must lie left of each one of these lines
+        return result1 < 0 && result2 < 0 && result3 < 0;
     }
 
     private float getActualX(float intrinsicX) {
