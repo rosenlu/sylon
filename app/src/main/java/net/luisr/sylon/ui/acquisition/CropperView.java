@@ -168,15 +168,10 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
                 int newX = (int) ((Math.min(Math.max(event.getX(), actualLeft), actualLeft + actualWidth) - actualLeft) / scaleX);
                 int newY = (int) ((Math.min(Math.max(event.getY(), actualTop), actualTop + actualHeight) - actualTop) / scaleY);
 
-                if (pointIsDraggable(newX, newY)) {
-                    cornerPoints[draggingPointIndex].x = newX;
-                    cornerPoints[draggingPointIndex].y = newY;
-                } else {
-                    Point newP = getClosestAllowedPoint(newX, newY);
-                    if (newP != null) {
-                        cornerPoints[draggingPointIndex].x = newP.x;
-                        cornerPoints[draggingPointIndex].y = newP.y;
-                    }
+                Point newP = getClosestAllowedPoint(newX, newY);
+                if (newP != null) {
+                    cornerPoints[draggingPointIndex].x = newP.x;
+                    cornerPoints[draggingPointIndex].y = newP.y;
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -208,41 +203,8 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
     }
 
     /**
-     * Checks weather the new x and y coordinates of a point are allowed.
-     * Every point must be inside the polygon spanned by the remaining 3 points and
-     * the edges of the screen. This polygon is always convex. Thus it is sufficient to
-     * check on which side of the lines spanned by each pair of the remaining points the dragging
-     * point is situated.
-     * @param newX the new X coordinate of the dragging point.
-     * @param newY the new Y coordinate of the dragging point.
-     * @return weather the new coordinates are allowed or not.
-     * @see <a href="https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119#4e3e">https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119#4e3e</a>
-     */
-    private boolean pointIsDraggable(int newX, int newY) {
-        if (draggingPointIndex == INDEX_NONE) {
-            return false;
-        }
-
-        // the remaining 3 points starting clockwise from the dragging point
-        Point p1 = cornerPoints[(draggingPointIndex + 1) % 4];
-        Point p2 = cornerPoints[(draggingPointIndex + 2) % 4];
-        Point p3 = cornerPoints[(draggingPointIndex + 3) % 4];
-
-        // p1 -> p2
-        int result12 = (newY - p1.y) * (p2.x - p1.x) - (newX - p1.x) * (p2.y - p1.y);
-
-        // p2 -> p3
-        int result23 = (newY - p2.y) * (p3.x - p2.x) - (newX - p2.x) * (p3.y - p2.y);
-
-        // p1 -> p3
-        int result13 = (newY - p1.y) * (p3.x - p1.x) - (newX - p1.x) * (p3.y - p1.y);
-
-        // p must lie left of each one of these lines
-        return result12 < 0 && result23 < 0 && result13 < 0;
-    }
-
-    /**
-     * Get the closest allowed point from the new X and Y coordinates.
+     * Get the closest allowed point from the new X and Y coordinates. If new X and Y are within the
+     * allowed region, the closes allowed point is simply new X and Y.
      * TODO: returning exactly p1/p2/p3 results in PolyToPoly transformation being impossible! Maybe move points a tiny bit in bisecting direction.
      * @param newX the new X coordinate of the dragging point.
      * @param newY the new Y coordinate of the dragging point.
@@ -266,14 +228,6 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         v23.normalize();
         v13.normalize();
 
-        // calculate bisecting vectors at p1 and p3
-        Vector2d bisectorP1 = (Vector2d) v12.clone();
-        bisectorP1.sub(v13);
-        bisectorP1.normalize();
-        Vector2d bisectorP3 = (Vector2d) v13.clone();
-        bisectorP3.sub(v23);
-        bisectorP3.normalize();
-
         // calculate perpendicular vectors
         @SuppressWarnings("SuspiciousNameCombination")
         Vector2d perpendicularToV12 = new Vector2d(- v12.y, v12.x);
@@ -283,42 +237,33 @@ public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
         Vector2d perpendicularToV13 = new Vector2d(- v13.y, v13.x);
 
         // calculate some booleans used below
-        boolean isRightOfBisectorP1 = (newY - p1.y) * (p1.x + bisectorP1.x - p1.x) - (newX - p1.x) * (p1.y + bisectorP1.y - p1.y) > 0;
-        boolean isLeftOfBisectorP3 = (newY - p3.y) * (p3.x + bisectorP3.x - p3.x) - (newX - p3.x) * (p3.y + bisectorP3.y - p3.y) < 0;
-        boolean isLeftOfPerpendicularToV12InP1 = (newY - p1.y) * (p1.x + perpendicularToV12.x - p1.x) - (newX - p1.x) * (p1.y + perpendicularToV12.y - p1.y) < 0;
-        boolean isRightOfPerpendicularToV23InP3 = (newY - p3.y) * (p3.x + perpendicularToV23.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV23.y - p3.y) > 0;
+        boolean isLeftOfV12 = (newY - p1.y) * (p2.x - p1.x) - (newX - p1.x) * (p2.y - p1.y) < 0;
+        boolean isLeftOfV23 = (newY - p2.y) * (p3.x - p2.x) - (newX - p2.x) * (p3.y - p2.y) < 0;
+        boolean isLeftOfV13 = (newY - p1.y) * (p3.x - p1.x) - (newX - p1.x) * (p3.y - p1.y) < 0;
+        boolean isRightOfPerpendicularToV12InP1 = (newY - p1.y) * (p1.x + perpendicularToV12.x - p1.x) - (newX - p1.x) * (p1.y + perpendicularToV12.y - p1.y) > 0;
         boolean isRightOfPerpendicularToV13InP1 = (newY - p1.y) * (p1.x + perpendicularToV13.x - p1.x) - (newX - p1.x) * (p1.y + perpendicularToV13.y - p1.y) > 0;
-        boolean isLeftOfPerpendicularToV13InP3 = (newY - p3.y) * (p3.x + perpendicularToV13.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV13.y - p3.y) < 0;
+        boolean isRightOfPerpendicularToV13InP3 = (newY - p3.y) * (p3.x + perpendicularToV13.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV13.y - p3.y) > 0;
+        boolean isRightOfPerpendicularToV23InP3 = (newY - p3.y) * (p3.x + perpendicularToV23.x - p3.x) - (newX - p3.x) * (p3.y + perpendicularToV23.y - p3.y) > 0;
 
         // check which line (p1 -> p2, p2 -> p3 or p1 -> p3) should be used to get closest allowed point
         Point baseline1;
         Point baseline2;
-        if (isRightOfBisectorP1) {
-            if (isLeftOfPerpendicularToV12InP1) {
-                return p1;
-            } else {
-                // choose p1 -> p2 as baseline
-                baseline1 = p1;
-                baseline2 = p2;
-            }
-        } else if (isLeftOfBisectorP3) {
-            if (isRightOfPerpendicularToV23InP3) {
-                return p3;
-            } else {
-                // choose p2 -> p3 as baseline
-                baseline1 = p2;
-                baseline2 = p3;
-            }
-        } else {  // is in between
-            if (isRightOfPerpendicularToV13InP1) {
-                return p1;
-            } else if (isLeftOfPerpendicularToV13InP3) {
-                return p3;
-            } else {
-                // choose p1 -> p3 as baseline
-                baseline1 = p1;
-                baseline2 = p3;
-            }
+
+        if (isLeftOfV12 && isLeftOfV23 && isLeftOfV13) {  // within allowed region
+            return new Point(newX, newY);
+        } else if (isRightOfPerpendicularToV12InP1) {  // baseline p1->p2
+            baseline1 = p1;
+            baseline2 = p2;
+        } else if (isRightOfPerpendicularToV13InP1) {  // dead zone of p1
+            return p1;
+        } else if (isRightOfPerpendicularToV13InP3) {  // baseline p1->p3
+            baseline1 = p1;
+            baseline2 = p3;
+        } else if (isRightOfPerpendicularToV23InP3) {  // dead zone of p3
+            return p3;
+        } else {  // baseline p2->p3
+            baseline1 = p2;
+            baseline2 = p3;
         }
 
         // calculate the closest allowed point by finding the perpendicular intersection of
