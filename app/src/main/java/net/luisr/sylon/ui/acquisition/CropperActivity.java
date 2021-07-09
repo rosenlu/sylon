@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.DirManager;
+import net.luisr.sylon.img.RotationHandler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,7 +65,14 @@ public class CropperActivity extends AppCompatActivity {
 
         //imageUri = Uri.parse("file:///storage/emulated/0/Android/media/net.luisr.sylon/Sylon/img/4FwK8NU (1).jpg");
         imageUri = Uri.parse(getIntent().getStringExtra(INTENT_EXTRA_IMAGE_URI));
-        cropperViewPage.setImageURI(imageUri);
+        Bitmap img;
+        try {
+            img = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            img = RotationHandler.rotateImageIfRequired(this, img, imageUri);
+            cropperViewPage.setImageBitmap(img);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         int imageWidth = cropperViewPage.getDrawable().getIntrinsicWidth();
         int imageHeight = cropperViewPage.getDrawable().getIntrinsicHeight();

@@ -20,8 +20,6 @@ import javax.vecmath.Vector2d;
  * Based on SmartCropper by pqpo (https://github.com/pqpo/SmartCropper)
  */
 public class CropperView extends androidx.appcompat.widget.AppCompatImageView {
-    // TODO: handle rotation of image... see RotationHandler
-
     /** Tag for logging. */
     private static final String TAG = "CropperView";
 
