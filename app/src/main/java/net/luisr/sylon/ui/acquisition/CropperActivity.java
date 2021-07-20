@@ -18,12 +18,14 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import net.luisr.sylon.R;
 import net.luisr.sylon.db.AppDatabase;
 import net.luisr.sylon.db.Page;
 import net.luisr.sylon.fs.DirManager;
 import net.luisr.sylon.img.RotationHandler;
+import net.luisr.sylon.img.ThumbnailFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +41,8 @@ public class CropperActivity extends AppCompatActivity {
     public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.image_uri_to_crop";
 
     private Uri imageUri;
+
+    private Bitmap correctedBitmap;
 
     private CropperView cropperViewPage;
 
@@ -62,14 +66,31 @@ public class CropperActivity extends AppCompatActivity {
         setTitle("Crop");
 
         cropperViewPage = findViewById(R.id.cropperViewPage);
+        ConstraintLayout constraintLayout = findViewById(R.id.cropperConstraintLayout);
+
 
         //imageUri = Uri.parse("file:///storage/emulated/0/Android/media/net.luisr.sylon/Sylon/img/4FwK8NU (1).jpg");
         imageUri = Uri.parse(getIntent().getStringExtra(INTENT_EXTRA_IMAGE_URI));
-        Bitmap img;
+
+        constraintLayout.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        int clWidth = constraintLayout.getMeasuredWidth();
+                        int clHeight = constraintLayout.getMeasuredHeight();
+
+                        constraintLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                        setBitmap(clWidth, clHeight);
+                    }
+                }
+        );
+    }
+
+    private void setBitmap(int maxWidth, int maxHeight) {
         try {
-            img = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-            img = RotationHandler.rotateImageIfRequired(this, img, imageUri);
-            cropperViewPage.setImageBitmap(img);
+            correctedBitmap = ThumbnailFactory.getResizedAndRotatedBitmap(this, imageUri, maxWidth, maxHeight);
+            cropperViewPage.setImageBitmap(correctedBitmap);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,7 +103,6 @@ public class CropperActivity extends AppCompatActivity {
         cornerPoints[2] = new Point(3 * imageWidth / 4, 3 * imageHeight / 4);
         cornerPoints[3] = new Point(3 * imageWidth / 4,     imageHeight / 4);
         cropperViewPage.setCornerPoints(cornerPoints);
-
     }
 
     @Override
@@ -118,34 +138,10 @@ public class CropperActivity extends AppCompatActivity {
                     0,
                     4 )) {
 
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                InputStream imageStream = null;
 
-                // Decode bitmap with inSampleSize set
-                options.inJustDecodeBounds = false;
-                try {
-                    imageStream = this.getContentResolver().openInputStream(imageUri);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Bitmap input = BitmapFactory.decodeStream(imageStream, null, options);
-
-                Bitmap output = Bitmap.createBitmap(input, 0, 0, input.getWidth(), input.getHeight(), matrix, true);
+                Bitmap output = Bitmap.createBitmap(correctedBitmap, 0, 0, correctedBitmap.getWidth(), correctedBitmap.getHeight(), matrix, true);
 
                 cropperViewPage.setImageBitmap(output);
-
-                /*
-                File outFile = new File(DirManager.getImageDirectory(this), "CROPPEDLOL_" + imageUri.getLastPathSegment());
-
-                FileOutputStream outStream = null;
-                try {
-                    outStream = new FileOutputStream(outFile);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                output.compress(Bitmap.CompressFormat.JPEG, 90, outStream);
-                Log.d(TAG, "Crop created and saved to "+outFile.getAbsolutePath());
-                */
 
             }
 

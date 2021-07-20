@@ -23,16 +23,13 @@ import java.io.InputStream;
  */
 public class RotationHandler {
 
-
     /**
-     * Rotate an image if required.
+     * Get the rotation of an image in degree. Can either be 0, 90, 180 or 270.
      *
-     * @param img           The image bitmap
-     * @param selectedImage Image URI
-     * @return The resulted {@link Bitmap} after manipulation
+     * @param selectedImage the URI of the selected image
+     * @return The rotation in degree.
      */
-    public static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
+    public static int getRotationInDegree(Context context, Uri selectedImage) throws IOException {
         InputStream input = context.getContentResolver().openInputStream(selectedImage);
         ExifInterface ei;
         ei = new ExifInterface(input);
@@ -41,21 +38,32 @@ public class RotationHandler {
 
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
+                return 90;
             case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
+                return 180;
             case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
+                return 270;
             default:
-                return img;
+                return 0;
         }
     }
 
-    private static Bitmap rotateImage(Bitmap img, int degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        img.recycle();
-        return rotatedImg;
+    /**
+     * Rotate an image if required.
+     *
+     * @param img    The image bitmap
+     * @param degree The rotation of the image in degree as returned by {@link #getRotationInDegree(Context, Uri)}.
+     * @return The resulted {@link Bitmap} after manipulation
+     */
+    public static Bitmap rotateImageIfRequired(Bitmap img, int degree) throws IOException {
+        if (degree == 0) {
+            return img;
+        } else {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(degree);
+            Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+            img.recycle();
+            return rotatedImg;
+        }
     }
 }

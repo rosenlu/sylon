@@ -30,9 +30,44 @@ public class ThumbnailFactory {
     private static final String TAG = "ThumbnailFactory";
 
     /**
-     * Scale an image (from URI) so that the shorter side is {@link #MAX_SIZE} pixels long. Also
-     * calls {@link RotationHandler#rotateImageIfRequired(Context, Bitmap, Uri)} to correct for
-     * possible EXIF rotation.
+     * Scale and rotate an image from URI so that after the rotation the width and height
+     * constraints are fulfilled.
+     *
+     * @param selectedImage The URI of the selected image.
+     * @param maxWidth the max width of the final, rotated image.
+     * @param maxHeight the max height of the final, rotated image.
+     * @return the scaled and rotated bitmap.
+     * @throws IOException if URI does not exist.
+     */
+    @SuppressWarnings("SuspiciousNameCombination")
+    public static Bitmap getResizedAndRotatedBitmap(Context context, Uri selectedImage, int maxWidth, int maxHeight) throws IOException {
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
+        BitmapFactory.decodeStream(imageStream, null, options);
+        imageStream.close();
+
+        int degree = RotationHandler.getRotationInDegree(context, selectedImage);
+
+        // Calculate inSampleSize
+        if (degree == 90 || degree == 270) {
+            options.inSampleSize = calculateInSampleSize(options, maxHeight, maxWidth);
+        } else {
+            options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight);
+        }
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        imageStream = context.getContentResolver().openInputStream(selectedImage);
+        Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+
+        return RotationHandler.rotateImageIfRequired(img, degree);
+    }
+
+    /**
+     * Scale an image (from URI) so that the longer side is {@link #MAX_SIZE} pixels long and save
+     * it to files.
      *
      * @param context       The current context
      * @param selectedImage The Image URI
@@ -41,25 +76,7 @@ public class ThumbnailFactory {
      */
     public static Uri makeThumbnail(Context context, Uri selectedImage)
             throws IOException {
-        int MAX_HEIGHT = MAX_SIZE;
-        int MAX_WIDTH = MAX_SIZE;
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
-        BitmapFactory.decodeStream(imageStream, null, options);
-        imageStream.close();
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, MAX_WIDTH, MAX_HEIGHT);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        imageStream = context.getContentResolver().openInputStream(selectedImage);
-        Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
-
-        img = RotationHandler.rotateImageIfRequired(context, img, selectedImage);
+        Bitmap img = getResizedAndRotatedBitmap(context, selectedImage, MAX_SIZE, MAX_SIZE);
 
         File thumbDir = DirManager.getThumbDirectory(context);
 
@@ -78,7 +95,7 @@ public class ThumbnailFactory {
      * Calculate an inSampleSize for use in a {@link BitmapFactory.Options} object when decoding
      * bitmaps using the decode* methods from {@link BitmapFactory}. This implementation calculates
      * the closest inSampleSize that will result in the final decoded bitmap having a width and
-     * height equal to or larger than the requested width and height. This implementation does not
+     * height equal to or smaller than the requested width and height. This implementation does not
      * ensure a power of 2 is returned for inSampleSize which can be faster when decoding but
      * results in a larger bitmap which isn't as useful for caching purposes.
      *
@@ -90,38 +107,16 @@ public class ThumbnailFactory {
      */
     private static int calculateInSampleSize(BitmapFactory.Options options,
                                              int reqWidth, int reqHeight) {
-        // Raw height and width of image
+        // Raw height and width of imageoptions
         final int height = options.outHeight;
         final int width = options.outWidth;
-        int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
+        // Calculate ratios of height and width to requested height and width
+        final int heightRatio = Math.round((float) height / (float) reqHeight);
+        final int widthRatio = Math.round((float) width / (float) reqWidth);
 
-            // Calculate ratios of height and width to requested height and width
-            final int heightRatio = Math.round((float) height / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-
-            // Choose the smallest ratio as inSampleSize value, this will guarantee a final image
-            // with both dimensions larger than or equal to the requested height and width.
-            inSampleSize = Math.min(heightRatio, widthRatio);
-
-            // This offers some additional logic in case the image has a strange
-            // aspect ratio. For example, a panorama may have a much larger
-            // width than height. In these cases the total pixels might still
-            // end up being too large to fit comfortably in memory, so we should
-            // be more aggressive with sample down the image (=larger inSampleSize).
-
-            final float totalPixels = width * height;
-
-            // Anything more than 2x the requested pixels we'll sample down further
-            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
-
-            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
-                inSampleSize++;
-            }
-        }
-        return inSampleSize;
+        // Choose the largest ratio as inSampleSize value, this will guarantee a final image
+        // with both dimensions smaller than or equal to the requested height and width.
+        return Math.max(1, Math.max(heightRatio, widthRatio));
     }
-
-
 }
