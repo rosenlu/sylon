@@ -2,6 +2,7 @@ package net.luisr.sylon.ui.acquisition;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -118,28 +119,58 @@ public class CropperActivity extends AppCompatActivity {
 
             // hack FIXME delete me
 
+            int targetWidth = 1000;
+            int targetHeight = 1000;
+
             Point[] cropPoints = cropperViewPage.getCornerPoints();
 
+            // get min/max of the cropPoints in order to reduce number of pixels that need to undergo transformation
+            int startX = Math.min(cropPoints[0].x, cropPoints[1].x);
+            int startY = Math.min(cropPoints[0].y, cropPoints[3].y);
+            int endX = Math.max(cropPoints[2].x, cropPoints[3].x);
+            int endY = Math.max(cropPoints[1].y, cropPoints[2].y);
+
+            // get the transformation matrix
             Matrix matrix = new Matrix();
             if (matrix.setPolyToPoly(
                     new float[] {
-                            cropPoints[0].x, cropPoints[0].y,
-                            cropPoints[1].x, cropPoints[1].y,
-                            cropPoints[2].x, cropPoints[2].y,
-                            cropPoints[3].x, cropPoints[3].y
+                            cropPoints[0].x-startX, cropPoints[0].y-startY,
+                            cropPoints[1].x-startX, cropPoints[1].y-startY,
+                            cropPoints[2].x-startX, cropPoints[2].y-startY,
+                            cropPoints[3].x-startX, cropPoints[3].y-startY
                     },
                     0,
                     new float[] {
                             0f, 0f,
-                            0f, 1000f,
-                            1000f, 1000f,
-                            1000f, 0f
+                            0f, (float) targetHeight,
+                            (float) targetWidth, (float) targetHeight,
+                            (float) targetWidth, 0f
                     },
                     0,
                     4 )) {
 
+                // get transformed coordinates of the edges of the bitmap
+                // (see Answer #1 in https://www.py4u.net/discuss/636133)
+                float[] mappedTopLeft = new float[] { 0, 0 };
+                matrix.mapPoints(mappedTopLeft);
+                int maptlx = Math.round(mappedTopLeft[0]);
+                int maptly = Math.round(mappedTopLeft[1]);
 
-                Bitmap output = Bitmap.createBitmap(correctedBitmap, 0, 0, correctedBitmap.getWidth(), correctedBitmap.getHeight(), matrix, true);
+                float[] mappedTopRight = new float[] { endX-startX, 0 };
+                matrix.mapPoints(mappedTopRight);
+                int maptrx = Math.round(mappedTopRight[0]);
+                int maptry = Math.round(mappedTopRight[1]);
+
+                float[] mappedLowerLeft = new float[] { 0, endY-startY };
+                matrix.mapPoints(mappedLowerLeft);
+                int mapllx = Math.round(mappedLowerLeft[0]);
+                int maplly = Math.round(mappedLowerLeft[1]);
+
+                int shiftX = Math.max(-maptlx, -mapllx);
+                int shiftY = Math.max(-maptry, -maptly);
+
+                Bitmap transformedBitmap = Bitmap.createBitmap(correctedBitmap, startX, startY, endX-startX, endY-startY, matrix, true);
+                Bitmap output = Bitmap.createBitmap(transformedBitmap, shiftX, shiftY, targetWidth, targetHeight, null, true);
 
                 cropperViewPage.setImageBitmap(output);
 
