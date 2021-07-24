@@ -1,5 +1,6 @@
 package net.luisr.sylon.ui.acquisition;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -33,6 +34,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CropperActivity extends AppCompatActivity {
 
@@ -47,6 +52,8 @@ public class CropperActivity extends AppCompatActivity {
 
     private CropperView cropperViewPage;
 
+    private ExecutorService imageLoadExecutor;
+
     /** Selected Resolution in DPI */
     private int targetDpi;
 
@@ -55,6 +62,7 @@ public class CropperActivity extends AppCompatActivity {
 
     public CropperActivity() {
         super(R.layout.activity_cropper);
+        imageLoadExecutor = Executors.newSingleThreadExecutor();
 
         // todo make adjustable
         targetDpi = 300;
@@ -89,21 +97,42 @@ public class CropperActivity extends AppCompatActivity {
     }
 
     private void setBitmap(int maxWidth, int maxHeight) {
-        try {
-            correctedBitmap = ThumbnailFactory.getResizedAndRotatedBitmap(this, imageUri, maxWidth, maxHeight);
-            cropperViewPage.setImageBitmap(correctedBitmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        int imageWidth = cropperViewPage.getDrawable().getIntrinsicWidth();
-        int imageHeight = cropperViewPage.getDrawable().getIntrinsicHeight();
-        Point[] cornerPoints = new Point[4];
-        cornerPoints[0] = new Point(    imageWidth / 4,     imageHeight / 4);
-        cornerPoints[1] = new Point(    imageWidth / 4, 3 * imageHeight / 4);
-        cornerPoints[2] = new Point(3 * imageWidth / 4, 3 * imageHeight / 4);
-        cornerPoints[3] = new Point(3 * imageWidth / 4,     imageHeight / 4);
-        cropperViewPage.setCornerPoints(cornerPoints);
+
+        Context context = this;
+
+        imageLoadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    correctedBitmap = ThumbnailFactory.getResizedAndRotatedBitmap(context, imageUri, maxWidth, maxHeight);
+
+                    runOnUiThread(() -> {
+
+                        cropperViewPage.setImageBitmap(correctedBitmap);
+
+                        int imageWidth = cropperViewPage.getDrawable().getIntrinsicWidth();
+                        int imageHeight = cropperViewPage.getDrawable().getIntrinsicHeight();
+                        Point[] cornerPoints = new Point[4];
+                        cornerPoints[0] = new Point(    imageWidth / 4,     imageHeight / 4);
+                        cornerPoints[1] = new Point(    imageWidth / 4, 3 * imageHeight / 4);
+                        cornerPoints[2] = new Point(3 * imageWidth / 4, 3 * imageHeight / 4);
+                        cornerPoints[3] = new Point(3 * imageWidth / 4,     imageHeight / 4);
+                        cropperViewPage.setCornerPoints(cornerPoints);
+
+                        imageLoadExecutor.shutdown();
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+
     }
 
     @Override
@@ -116,6 +145,10 @@ public class CropperActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.itemSaveCrop) {
+
+            if (!imageLoadExecutor.isShutdown()) {
+                return true;
+            }
 
             // hack FIXME delete me
 
