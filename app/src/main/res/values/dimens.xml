@@ -14,4 +14,7 @@
     <dimen name="donut_margin_horizontal">20dp</dimen>
     <dimen name="donut_margin_vertical">20dp</dimen>
 
+    <item name="magnifier_bias" type="dimen" format="float">0.06</item>
+    <item name="magnifier_width_fraction" type="dimen" format="float">0.4</item>
+
 </resources>

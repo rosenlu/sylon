@@ -29,6 +29,16 @@ public class ThumbnailFactory {
     /** The tag used for logging */
     private static final String TAG = "ThumbnailFactory";
 
+    public static class ResizeResult {
+        public final int inSampleSize;
+        public final Bitmap bitmap;
+
+        public ResizeResult(int inSampleSize, Bitmap bitmap) {
+            this.inSampleSize = inSampleSize;
+            this.bitmap = bitmap;
+        }
+    }
+
     /**
      * Scale and rotate an image from URI so that after the rotation the width and height
      * constraints are fulfilled.
@@ -36,11 +46,11 @@ public class ThumbnailFactory {
      * @param selectedImage The URI of the selected image.
      * @param maxWidth the max width of the final, rotated image.
      * @param maxHeight the max height of the final, rotated image.
-     * @return the scaled and rotated bitmap.
+     * @return the result of resizing.
      * @throws IOException if URI does not exist.
      */
     @SuppressWarnings("SuspiciousNameCombination")
-    public static Bitmap getResizedAndRotatedBitmap(Context context, Uri selectedImage, int maxWidth, int maxHeight) throws IOException {
+    public static ResizeResult getResizedAndRotatedBitmap(Context context, Uri selectedImage, int maxWidth, int maxHeight) throws IOException {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -62,7 +72,7 @@ public class ThumbnailFactory {
         imageStream = context.getContentResolver().openInputStream(selectedImage);
         Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
 
-        return RotationHandler.rotateImageIfRequired(img, degree);
+        return new ResizeResult(options.inSampleSize, RotationHandler.rotateImageIfRequired(img, degree));
     }
 
     /**
@@ -76,7 +86,7 @@ public class ThumbnailFactory {
      */
     public static Uri makeThumbnail(Context context, Uri selectedImage)
             throws IOException {
-        Bitmap img = getResizedAndRotatedBitmap(context, selectedImage, MAX_SIZE, MAX_SIZE);
+        Bitmap img = getResizedAndRotatedBitmap(context, selectedImage, MAX_SIZE, MAX_SIZE).bitmap;
 
         File thumbDir = DirManager.getThumbDirectory(context);
 

@@ -2,40 +2,25 @@ package net.luisr.sylon.ui.acquisition;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 
 import net.luisr.sylon.R;
-import net.luisr.sylon.db.AppDatabase;
-import net.luisr.sylon.db.Page;
-import net.luisr.sylon.fs.DirManager;
-import net.luisr.sylon.img.RotationHandler;
 import net.luisr.sylon.img.ThumbnailFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.ConnectException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,11 +33,18 @@ public class CropperActivity extends AppCompatActivity {
 
     private Uri imageUri;
 
-    private Bitmap correctedBitmap;
+    private Bitmap displayedBitmap;
+    private int displayedBitmapWidth;
+
+    private int resizeRatio;
 
     private CropperView cropperViewPage;
 
-    private ExecutorService imageLoadExecutor;
+    private MagnifierView magnifierView;
+
+    private int magnifierWidth, magnifierHeight;
+
+    private final ExecutorService imageLoadExecutor;
 
     /** Selected Resolution in DPI */
     private int targetDpi;
@@ -74,6 +66,8 @@ public class CropperActivity extends AppCompatActivity {
 
         setTitle("Crop");
 
+        magnifierView = findViewById(R.id.magnifierView);
+
         cropperViewPage = findViewById(R.id.cropperViewPage);
         ConstraintLayout constraintLayout = findViewById(R.id.cropperConstraintLayout);
 
@@ -88,51 +82,82 @@ public class CropperActivity extends AppCompatActivity {
                         int clWidth = constraintLayout.getMeasuredWidth();
                         int clHeight = constraintLayout.getMeasuredHeight();
 
+                        magnifierWidth = magnifierView.getMeasuredWidth();
+                        magnifierHeight = magnifierView.getMeasuredHeight();
+
                         constraintLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                        setBitmap(clWidth, clHeight);
+                        setupImages(clWidth, clHeight);
                     }
                 }
         );
     }
 
-    private void setBitmap(int maxWidth, int maxHeight) {
-
+    private void setupImages(int layoutWidth, int layoutHeight) {
 
         Context context = this;
-
-        imageLoadExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    correctedBitmap = ThumbnailFactory.getResizedAndRotatedBitmap(context, imageUri, maxWidth, maxHeight);
-
-                    runOnUiThread(() -> {
-
-                        cropperViewPage.setImageBitmap(correctedBitmap);
-
-                        int imageWidth = cropperViewPage.getDrawable().getIntrinsicWidth();
-                        int imageHeight = cropperViewPage.getDrawable().getIntrinsicHeight();
-                        Point[] cornerPoints = new Point[4];
-                        cornerPoints[0] = new Point(    imageWidth / 4,     imageHeight / 4);
-                        cornerPoints[1] = new Point(    imageWidth / 4, 3 * imageHeight / 4);
-                        cornerPoints[2] = new Point(3 * imageWidth / 4, 3 * imageHeight / 4);
-                        cornerPoints[3] = new Point(3 * imageWidth / 4,     imageHeight / 4);
-                        cropperViewPage.setCornerPoints(cornerPoints);
-
-                        imageLoadExecutor.shutdown();
-                    });
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        imageLoadExecutor.execute(() -> {
+            try {
+                ThumbnailFactory.ResizeResult resizeResult = ThumbnailFactory.getResizedAndRotatedBitmap(context, imageUri, layoutWidth, layoutHeight);
+                displayedBitmap = resizeResult.bitmap;
+                resizeRatio = resizeResult.inSampleSize;
+                runOnUiThread(() -> {
+                    cropperViewPage.setImageBitmap(displayedBitmap);
+                    resetCornerPointsToDefault();
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
 
+        imageLoadExecutor.execute(() -> {
+            try {
+                Bitmap magnifierBitmap = ThumbnailFactory.getResizedAndRotatedBitmap(context, imageUri, Integer.MAX_VALUE, Integer.MAX_VALUE).bitmap;
+                runOnUiThread(() -> {
+                    magnifierView.setImageBitmap(magnifierBitmap);
+                    cropperViewPage.setDragCallback(this::onDrag);
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        imageLoadExecutor.shutdown();
+
+    }
+
+    private void resetCornerPointsToDefault() {
+        displayedBitmapWidth = cropperViewPage.getDrawable().getIntrinsicWidth();
+        int displayedBitmapHeight = cropperViewPage.getDrawable().getIntrinsicHeight();
+        Point[] cornerPoints = new Point[4];
+        cornerPoints[0] = new Point(    displayedBitmapWidth / 4,     displayedBitmapHeight / 4);
+        cornerPoints[1] = new Point(    displayedBitmapWidth / 4, 3 * displayedBitmapHeight / 4);
+        cornerPoints[2] = new Point(3 * displayedBitmapWidth / 4, 3 * displayedBitmapHeight / 4);
+        cornerPoints[3] = new Point(3 * displayedBitmapWidth / 4,     displayedBitmapHeight / 4);
+        cropperViewPage.setCornerPoints(cornerPoints);
+    }
 
 
+    private void onDrag(Point dragPoint) {
+        if (dragPoint.equals(CropperView.POINT_NOT_DRAGGING)) {
+            magnifierView.setVisibility(View.INVISIBLE);
+        } else {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) magnifierView.getLayoutParams();
+            if (dragPoint.x < (displayedBitmapWidth * 0.5f)) {
+                params.horizontalBias = 1.0f - ResourcesCompat.getFloat(getResources(), R.dimen.magnifier_bias);
+            } else {
+                params.horizontalBias = ResourcesCompat.getFloat(getResources(), R.dimen.magnifier_bias);
+            }
+            magnifierView.setLayoutParams(params);
+
+            magnifierView.setVisibility(View.VISIBLE);
+            Matrix m = magnifierView.getImageMatrix();
+            m.reset();
+            m.postTranslate(-1f * resizeRatio * dragPoint.x + magnifierWidth * 0.5f,
+                    -1f * resizeRatio * dragPoint.y + magnifierHeight * 0.5f);
+            magnifierView.invalidate();
+            magnifierView.setImageMatrix(m);
+        }
     }
 
     @Override
@@ -144,18 +169,16 @@ public class CropperActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.itemSaveCrop) {
-
-            if (!imageLoadExecutor.isShutdown()) {
-                return true;
-            }
+        if (id == R.id.itemSaveCrop && imageLoadExecutor.isShutdown()) {
 
             // hack FIXME delete me
 
-            int targetWidth = 1000;
-            int targetHeight = 1000;
-
+            Bitmap input = displayedBitmap;
+            Bitmap output;
+            // reminder: for transforming original image, scale corner points by downsample ratio
             Point[] cropPoints = cropperViewPage.getCornerPoints();
+            int targetWidth = 1000; // calculate later with target size & dpi
+            int targetHeight = 1000;
 
             // get min/max of the cropPoints in order to reduce number of pixels that need to undergo transformation
             int startX = Math.min(cropPoints[0].x, cropPoints[1].x);
@@ -202,11 +225,14 @@ public class CropperActivity extends AppCompatActivity {
                 int shiftX = Math.max(-maptlx, -mapllx);
                 int shiftY = Math.max(-maptry, -maptly);
 
-                Bitmap transformedBitmap = Bitmap.createBitmap(correctedBitmap, startX, startY, endX-startX, endY-startY, matrix, true);
-                Bitmap output = Bitmap.createBitmap(transformedBitmap, shiftX, shiftY, targetWidth, targetHeight, null, true);
+                Bitmap transformedBitmap = Bitmap.createBitmap(input, startX, startY, endX-startX, endY-startY, matrix, true);
+                output = Bitmap.createBitmap(transformedBitmap, shiftX, shiftY, targetWidth, targetHeight, null, true);
 
-                cropperViewPage.setImageBitmap(output);
 
+                // for testing inside cropper
+                displayedBitmap = output;
+                cropperViewPage.setImageBitmap(displayedBitmap);
+                resetCornerPointsToDefault();
             }
 
             return true;
