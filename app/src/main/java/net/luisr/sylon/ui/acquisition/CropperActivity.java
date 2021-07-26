@@ -6,10 +6,12 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import net.luisr.sylon.R;
 import net.luisr.sylon.img.ThumbnailFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,6 +33,8 @@ public class CropperActivity extends AppCompatActivity {
     private static final String TAG = "CropperActivity";
 
     public static final String INTENT_EXTRA_IMAGE_URI = "net.luisr.sylon.image_uri_to_crop";
+
+    private static final int MAX_BITMAP_SIZE = (int)1e8; // area 10k * 10k
 
     private Uri imageUri;
 
@@ -181,10 +186,10 @@ public class CropperActivity extends AppCompatActivity {
             int targetHeight = 1000;
 
             // get min/max of the cropPoints in order to reduce number of pixels that need to undergo transformation
-            int startX = Math.min(cropPoints[0].x, cropPoints[1].x);
-            int startY = Math.min(cropPoints[0].y, cropPoints[3].y);
-            int endX = Math.max(cropPoints[2].x, cropPoints[3].x);
-            int endY = Math.max(cropPoints[1].y, cropPoints[2].y);
+            int startX = Math.min(Math.min(cropPoints[0].x, cropPoints[1].x), Math.min(cropPoints[2].x, cropPoints[3].x));
+            int startY = Math.min(Math.min(cropPoints[0].y, cropPoints[1].y), Math.min(cropPoints[2].y, cropPoints[3].y));
+            int endX   = Math.max(Math.max(cropPoints[0].x, cropPoints[1].x), Math.max(cropPoints[2].x, cropPoints[3].x));
+            int endY   = Math.max(Math.max(cropPoints[0].y, cropPoints[1].y), Math.max(cropPoints[2].y, cropPoints[3].y));
 
             // get the transformation matrix
             Matrix matrix = new Matrix();
@@ -222,17 +227,37 @@ public class CropperActivity extends AppCompatActivity {
                 int mapllx = Math.round(mappedLowerLeft[0]);
                 int maplly = Math.round(mappedLowerLeft[1]);
 
-                int shiftX = Math.max(-maptlx, -mapllx);
-                int shiftY = Math.max(-maptry, -maptly);
+                float[] mappedLowerRight = new float[] { endX-startX, endY-startY };
+                matrix.mapPoints(mappedLowerRight);
+                int maplrx = Math.round(mappedLowerRight[0]);
+                int maplry = Math.round(mappedLowerRight[1]);
 
-                Bitmap transformedBitmap = Bitmap.createBitmap(input, startX, startY, endX-startX, endY-startY, matrix, true);
-                output = Bitmap.createBitmap(transformedBitmap, shiftX, shiftY, targetWidth, targetHeight, null, true);
+                int maxX = Math.max(Math.max(maptlx, mapllx), Math.max(maptrx, maplrx));
+                int maxY = Math.max(Math.max(maptly, maplly), Math.max(maptry, maplry));
+
+                int minX = Math.min(Math.min(maptlx, mapllx), Math.min(maptrx, maplrx));
+                int minY = Math.min(Math.min(maptly, maplly), Math.min(maptry, maplry));
+
+                if ((maxX-minX)*(maxY-minY) > MAX_BITMAP_SIZE) {
+                    Toast.makeText(this, "Transform too distorted", Toast.LENGTH_SHORT).show();
+                } else {
+                    try {
+                        Bitmap transformedBitmap = Bitmap.createBitmap(input, startX, startY, endX-startX, endY-startY, matrix, true);
+                        output = Bitmap.createBitmap(transformedBitmap, -minX, -minY, targetWidth, targetHeight, null, true);
 
 
-                // for testing inside cropper
-                displayedBitmap = output;
-                cropperViewPage.setImageBitmap(displayedBitmap);
-                resetCornerPointsToDefault();
+
+                        // for testing inside cropper
+                        displayedBitmap = output;
+                        cropperViewPage.setImageBitmap(displayedBitmap);
+                        resetCornerPointsToDefault();
+                    } catch (IllegalArgumentException e) {
+                        Toast.makeText(this, "Bitmap coordinates out of bounds", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, Arrays.toString(e.getStackTrace()));
+                    }
+                }
+
+
             }
 
             return true;

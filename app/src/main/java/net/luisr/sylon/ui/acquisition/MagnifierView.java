@@ -39,8 +39,10 @@ public class MagnifierView extends androidx.appcompat.widget.AppCompatImageView 
 
         Drawable drawable = getDrawable();
         if (drawable != null) {
-            canvas.drawLine(getWidth() * 0.5f, 0f, getWidth() * 0.5f, getHeight(), crosshairPaint);
-            canvas.drawLine(0f, getHeight() * 0.5f, getWidth(), getHeight() * 0.5f, crosshairPaint);
+            int w = getWidth();
+            int h = getHeight();
+            canvas.drawLine(w * 0.5f, 0f, w * 0.5f, h, crosshairPaint);
+            canvas.drawLine(0f, h * 0.5f, w, h * 0.5f, crosshairPaint);
         }
 
     }
